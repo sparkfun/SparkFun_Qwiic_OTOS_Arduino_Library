@@ -5,7 +5,7 @@
 #include <stdint.h>
 
 // Default I2C addresses of the Qwiic OTOS
-const uint8_t kOtosDefaultAddress = 0x19;
+const uint8_t kOtosDefaultAddress = 0x17;
 
 // OTOS register map
 const uint8_t kOtosRegProductId = 0x00;
