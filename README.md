@@ -1,11 +1,12 @@
-# SparkFun_Template_Arduino_Library
+# SparkFun Optical Tracking Odometry Sensor Arduino Library
 ========================================
 
-<table class="table table-hover table-striped table-bordered">
-    <p> TODO: Add product photos and links </p>
-</table>
 
-TODO: Add description of product and library
+[![SparkFun Optical Tracking Odometry Sensor]()](https://www.sparkfun.com/products/24904)
+
+[*SparkFun Optical Tracking Odometry Sensor [SEN-24904]*](https://www.sparkfun.com/products/24904)
+
+Arduino Library for the SparkFun Optical Tracking Odometry Sensor
 
 Repository Contents
 -------------------
@@ -16,8 +17,8 @@ Repository Contents
 
 Documentation
 --------------
-* **[GitHub Repo](https://github.com/sparkfun/TODO)** - TODO: Update URL and description
-* **[Hookup Guide](http://docs.sparkfun.com/TODO/)** - TODO: Update URL and description
+* **[GitHub Repo](https://github.com/sparkfun/SparkFun_Optical_Tracking_Odometry_Sensor)** - Hardware repository for the SparkFun Optical Tracking Odometry Sensor
+* **[Hookup Guide](https://docs.sparkfun.com/SparkFun_Optical_Tracking_Odometry_Sensor)** - Hookup Guide for the SparkFun Optical Tracking Odometry Sensor
 
 License Information
 -------------------
