@@ -23,7 +23,9 @@ void setup()
     
     // Here you can set the offset for the sensor relative to the center of the
     // robot. The units default to inches and degrees, but if you want to use
-    // different units, specify them before setting the offset! For example, if
+    // different units, specify them before setting the offset! Note that as of
+    // firmware version 1.0, these values will be lost after a power cycle, so
+    // you will need to set them each time you power up the sensor. For example, if
     // the sensor is mounted 5 inches to the left (negative X) and 10 inches
     // forward (positive Y) of the center of the robot, and mounted 90 degrees
     // clockwise (negative rotation) from the robot's orientation, the offset

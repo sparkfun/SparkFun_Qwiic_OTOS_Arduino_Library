@@ -23,7 +23,9 @@ void setup()
     
     // Set the desired units for linear and angular measurements. Can be either
     // meters or inches for linear, and radians or degrees for angular. If not
-    // set, the default is inches and degrees.
+    // set, the default is inches and degrees. Note that this setting is not
+    // stored in the sensor, it's part of the library, so you need to set at the
+    // start of all your programs.
     myOtos.setLinearUnit(kOtosLinearUnitMeters);
     // myOtos.setLinearUnit(kOtosLinearUnitInches);
     myOtos.setAngularUnit(kOtosAngularUnitRadians);

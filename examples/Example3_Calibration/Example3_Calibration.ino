@@ -22,13 +22,15 @@ void setup()
     Serial.println("OTOS connected!");
     
     // The IMU on the OTOS includes a gyroscope and accelerometer, which could
-    // have an offset. The OTOS performs a quick calibration when it powers up,
-    // but it is recommended to perform a more thorough calibration at the start
-    // of your programs. Note that the sensor must be completely stationary and
-    // flat during calibration! When calling calibrateImu(), you can specify the
-    // number of samples to take and whether to wait until the calibration is
-    // complete. If no parameters are provided, it will take 255 samples and
-    // wait until done; each sample takes about 1.2ms, so about 306ms total
+    // have an offset. Note that as of firmware version 1.0, the calibration
+    // will be lost after a power cycle; the OTOS performs a quick calibration
+    // when it powers up, but it is recommended to perform a more thorough
+    // calibration at the start of all your programs. Note that the sensor must
+    // be completely stationary and flat during calibration! When calling
+    // calibrateImu(), you can specify the number of samples to take and whether
+    // to wait until the calibration is complete. If no parameters are provided,
+    // it will take 255 samples and wait until done; each sample takes about
+    // 1.2ms, so about 306ms total
     myOtos.calibrateImu();
     // myOtos.calibrateImu(255, true);
 
