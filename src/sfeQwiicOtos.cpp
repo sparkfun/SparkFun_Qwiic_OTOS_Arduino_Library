@@ -13,9 +13,13 @@ sfeQwiicOtos::sfeQwiicOtos()
     _offsetPoseInv.y = 0;
     _offsetPoseInv.h = 0;
 
-    // Set default units to meters and radians
-    _linearUnit = kOtosLinearUnitMeters;
-    _angularUnit = kOtosAngularUnitRadians;
+    // Set default units to inches and degrees
+    _linearUnit = kOtosLinearUnitInches;
+    _angularUnit = kOtosAngularUnitDegrees;
+
+    // Set conversion factors to default units
+    _meterToUnit = kMeterToInch;
+    _radToUnit = kRadianToDegree;
 }
 
 sfeTkError_t sfeQwiicOtos::begin(sfeTkII2C *commBus)
@@ -56,10 +60,31 @@ sfeTkError_t sfeQwiicOtos::isConnected()
     return kSTkErrOk;
 }
 
+sfeTkError_t sfeQwiicOtos::getVersionInfo(otos_version_t &hwVersion, otos_version_t &fwVersion)
+{
+    // Read hardware and firmware version registers
+    uint8_t rawData[2];
+    size_t readBytes = 0;
+    sfeTkError_t err = _commBus->readRegisterRegion(kOtosRegHwVersion, rawData, 2, readBytes);
+    if(err != kSTkErrOk)
+        return err;
+
+    // Check if we read the correct number of bytes
+    if(readBytes != 2)
+        return kSTkErrFail;
+
+    // Store the version info
+    hwVersion.value = rawData[0];
+    fwVersion.value = rawData[1];
+
+    // Done!
+    return kSTkErrOk;
+}
+
 sfeTkError_t sfeQwiicOtos::calibrateImu(uint8_t numSamples, bool waitUntilDone)
 {
     // Write the number of samples to the device
-    sfeTkError_t err = _commBus->writeRegisterByte(kOtosRegGyroCalib, numSamples);
+    sfeTkError_t err = _commBus->writeRegisterByte(kOtosRegImuCalib, numSamples);
     if(err != kSTkErrOk)
         return err;
     
@@ -76,7 +101,7 @@ sfeTkError_t sfeQwiicOtos::calibrateImu(uint8_t numSamples, bool waitUntilDone)
         delayMs(2);
 
         // Read the gryo calibration register value
-        err = _commBus->readRegisterByte(kOtosRegGyroCalib, calibrationValue);
+        err = _commBus->readRegisterByte(kOtosRegImuCalib, calibrationValue);
         if(err != kSTkErrOk)
             return err;
     }
@@ -96,17 +121,11 @@ void sfeQwiicOtos::setLinearUnit(otos_linear_unit_t unit)
     if(unit == _linearUnit)
         return;
 
-    // Compute conversion factor to new units
-    float conversionFactor = (unit == kOtosLinearUnitMeters) ? kInchToMeter : kMeterToInch;
-
-    // Convert offset pose and its inverse to new units
-    _offsetPose.x *= conversionFactor;
-    _offsetPose.y *= conversionFactor;
-    _offsetPoseInv.x *= conversionFactor;
-    _offsetPoseInv.y *= conversionFactor;
-    
     // Store new unit
     _linearUnit = unit;
+    
+    // Compute conversion factor to new units
+    _meterToUnit = (unit == kOtosLinearUnitMeters) ? 1.0f : kMeterToInch;
 }
 
 otos_angular_unit_t sfeQwiicOtos::getAngularUnit()
@@ -120,62 +139,133 @@ void sfeQwiicOtos::setAngularUnit(otos_angular_unit_t unit)
     if(unit == _angularUnit)
         return;
 
-    // Compute conversion factor to new units
-    float conversionFactor = (unit == kOtosAngularUnitRadians) ? kDegreeToRadian : kRadianToDegree;
-
-    // Convert offset pose and its inverse to new units
-    _offsetPose.h *= conversionFactor;
-    _offsetPoseInv.h *= conversionFactor;
-    
     // Store new unit
     _angularUnit = unit;
+
+    // Compute conversion factor to new units
+    _radToUnit = (unit == kOtosAngularUnitRadians) ? 1.0f : kRadianToDegree;
 }
 
-sfeTkError_t sfeQwiicOtos::setOffset(otos_pose2d_t &pose)
+sfeTkError_t sfeQwiicOtos::getLinearScalar(float &scalar)
+{
+    // Read the linear scalar from the device
+    uint8_t rawScalar = 0;
+    sfeTkError_t err = _commBus->readRegisterByte(kOtosRegScalarXY, rawScalar);
+    if(err != kSTkErrOk)
+        return kSTkErrFail;
+
+    // Convert to float, multiples of 0.1%
+    scalar = (((int8_t)rawScalar) * 0.001f) + 1.0f;
+
+    // Done!
+    return kSTkErrOk;
+}
+
+sfeTkError_t sfeQwiicOtos::setLinearScalar(float scalar)
+{
+    // Check if the scalar is out of bounds, can only be 0.872 to 1.127
+    if(scalar < 0.872f || scalar > 1.127f)
+        return kSTkErrFail;
+    
+    // Convert to raw integer, multiples of 0.1%
+    uint8_t rawScalar = (int8_t)((scalar - 1.0f) * 1000);
+
+    // Write the scalar to the device
+    return _commBus->writeRegisterByte(kOtosRegScalarXY, rawScalar);
+}
+
+sfeTkError_t sfeQwiicOtos::getAngularScalar(float &scalar)
+{
+    // Read the angular scalar from the device
+    uint8_t rawScalar = 0;
+    sfeTkError_t err = _commBus->readRegisterByte(kOtosRegScalarH, rawScalar);
+    if(err != kSTkErrOk)
+        return kSTkErrFail;
+
+    // Convert to float, multiples of 0.1%
+    scalar = (((int8_t)rawScalar) * 0.001f) + 1.0f;
+
+    // Done!
+    return kSTkErrOk;
+}
+
+sfeTkError_t sfeQwiicOtos::setAngularScalar(float scalar)
+{
+    // Check if the scalar is out of bounds, can only be 0.872 to 1.127
+    if(scalar < 0.872f || scalar > 1.127f)
+        return kSTkErrFail;
+    
+    // Convert to raw integer, multiples of 0.1%
+    int8_t rawScalar = (scalar - 1.0f) * 1000;
+
+    // Write the scalar to the device
+    return _commBus->writeRegisterByte(kOtosRegScalarH, (uint8_t)rawScalar);
+}
+
+void sfeQwiicOtos::setOffset(otos_pose2d_t &pose)
 {
     // Copy the pose to the offset
     _offsetPose = pose;
 
-    // Convert units if needed
-    if(_linearUnit == kOtosLinearUnitInches)
-    {
-        _offsetPose.x *= 0.0254;
-        _offsetPose.y *= 0.0254;
-    }
-    if(_angularUnit == kOtosAngularUnitDegrees)
-        _offsetPose.h *= M_PI / 180.0;
+    // Convert to meters and radians
+    _offsetPose.x /= _meterToUnit;
+    _offsetPose.y /= _meterToUnit;
+    _offsetPose.h /= _radToUnit;
 
     // Compute the inverse of the offset
     _offsetPoseInv = invertPose(_offsetPose);
-
-    return kSTkErrOk;
 }
 
-sfeTkError_t sfeQwiicOtos::getOffset(otos_pose2d_t &pose)
+void sfeQwiicOtos::getOffset(otos_pose2d_t &pose)
 {
     // Copy the offset to the pose
     pose = _offsetPose;
 
-    // Convert units if needed
-    if(_linearUnit == kOtosLinearUnitInches)
-    {
-        pose.x /= 0.0254;
-        pose.y /= 0.0254;
-    }
-    if(_angularUnit == kOtosAngularUnitDegrees)
-        pose.h *= 180.0 / M_PI;
+    // Convert to current units
+    pose.x *= _meterToUnit;
+    pose.y *= _meterToUnit;
+    pose.h *= _radToUnit;
+}
 
-    return kSTkErrOk;
+sfeTkError_t sfeQwiicOtos::resetTracking()
+{
+    // Set tracking reset bit
+    return _commBus->writeRegisterByte(kOtosRegReset, 0x01);
 }
 
 sfeTkError_t sfeQwiicOtos::getPosition(otos_pose2d_t &pose)
 {
-    return readPoseRegs(kOtosRegPosXL, pose, kInt16ToMeter, kInt16ToRad);
+    // Read the raw pose data
+    otos_pose2d_t sensorPose;
+    sfeTkError_t err = readPoseRegs(kOtosRegPosXL, sensorPose, kInt16ToMeter, kInt16ToRad);
+    if(err != kSTkErrOk)
+        return err;
+    
+    // Apply the offset
+    pose = transformPose(sensorPose, _offsetPoseInv);
+
+    // Convert to current units
+    pose.x *= _meterToUnit;
+    pose.y *= _meterToUnit;
+    pose.h *= _radToUnit;
+
+    // Done!
+    return kSTkErrOk;
 }
 
 sfeTkError_t sfeQwiicOtos::setPosition(otos_pose2d_t &pose)
 {
-    return writePoseRegs(kOtosRegPosXL, pose, kMeterToInt16, kRadToInt16);
+    otos_pose2d_t sensorPose;
+    
+    // Convert to meters and radians
+    sensorPose.x = pose.x / _meterToUnit;
+    sensorPose.y = pose.y / _meterToUnit;
+    sensorPose.h = pose.h / _radToUnit;
+
+    // Apply the offset
+    sensorPose = transformPose(sensorPose, _offsetPose);
+
+    return writePoseRegs(kOtosRegPosXL, sensorPose, kMeterToInt16, kRadToInt16);
 }
 
 sfeTkError_t sfeQwiicOtos::getVelocity(otos_pose2d_t &pose)

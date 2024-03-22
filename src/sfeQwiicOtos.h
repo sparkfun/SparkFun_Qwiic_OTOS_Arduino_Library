@@ -9,7 +9,12 @@ const uint8_t kOtosDefaultAddress = 0x17;
 
 // OTOS register map
 const uint8_t kOtosRegProductId = 0x00;
-const uint8_t kOtosRegGyroCalib = 0x0D;
+const uint8_t kOtosRegHwVersion = 0x01;
+const uint8_t kOtosRegFwVersion = 0x02;
+const uint8_t kOtosRegScalarXY = 0x04;
+const uint8_t kOtosRegScalarH = 0x05;
+const uint8_t kOtosRegImuCalib = 0x06;
+const uint8_t kOtosRegReset = 0x07;
 const uint8_t kOtosRegSelfTest = 0x0E;
 const uint8_t kOtosRegStatus = 0x0F;
 const uint8_t kOtosRegPosXL = 0x10;
@@ -83,6 +88,16 @@ enum otos_angular_unit_t
     kOtosAngularUnitDegrees = 1
 };
 
+// Version register bit fields
+typedef union {
+    struct
+    {
+        uint8_t minor : 4;
+        uint8_t major : 4;
+    };
+    uint8_t value;
+} otos_version_t;
+
 class sfeQwiicOtos
 {
   public:
@@ -98,9 +113,7 @@ class sfeQwiicOtos
     /// @return 0 for succuss, negative for errors, positive for warnings
     sfeTkError_t isConnected();
 
-    sfeTkError_t getHardwareVersion(uint8_t &hwVersion);
-
-    sfeTkError_t getFirmwareVersion(uint8_t &fwVersion);
+    sfeTkError_t getVersionInfo(otos_version_t &hwVersion, otos_version_t &fwVersion);
 
     sfeTkError_t calibrateImu(uint8_t numSamples = 255, bool waitUntilDone = true);
 
@@ -112,9 +125,19 @@ class sfeQwiicOtos
 
     void setAngularUnit(otos_angular_unit_t unit);
 
-    sfeTkError_t getOffset(otos_pose2d_t &pose);
+    sfeTkError_t getLinearScalar(float &scalar);
 
-    sfeTkError_t setOffset(otos_pose2d_t &pose);
+    sfeTkError_t setLinearScalar(float scalar);
+
+    sfeTkError_t getAngularScalar(float &scalar);
+
+    sfeTkError_t setAngularScalar(float scalar);
+
+    void getOffset(otos_pose2d_t &pose);
+
+    void setOffset(otos_pose2d_t &pose);
+
+    sfeTkError_t resetTracking();
 
     sfeTkError_t getPosition(otos_pose2d_t &pose);
 
@@ -153,6 +176,11 @@ class sfeQwiicOtos
     // applied to the public functions
     otos_linear_unit_t _linearUnit;
     otos_angular_unit_t _angularUnit;
+
+    // Conversion factors from meters and radians to the current linear and
+    // angular units
+    float _meterToUnit;
+    float _radToUnit;
 
     // Offset pose of the OTOS from the host, and its inverse. Stored internally
     // in meters and radians
