@@ -225,19 +225,9 @@ sfeTkError_t sfeQwiicOtos::getVelocity(otos_pose2d_t &pose)
     return readPoseRegs(kOtosRegVelXL, pose, kInt16ToMeter, kInt16ToRps);
 }
 
-sfeTkError_t sfeQwiicOtos::setVelocity(otos_pose2d_t &pose)
-{
-    return writePoseRegs(kOtosRegVelXL, pose, kMeterToInt16, kRpsToInt16);
-}
-
 sfeTkError_t sfeQwiicOtos::getAccerlation(otos_pose2d_t &pose)
 {
     return readPoseRegs(kOtosRegAccXL, pose, kInt16ToMeter, kInt16ToRpss);
-}
-
-sfeTkError_t sfeQwiicOtos::setAccerlation(otos_pose2d_t &pose)
-{
-    return writePoseRegs(kOtosRegAccXL, pose, kMeterToInt16, kRpssToInt16);
 }
 
 sfeTkError_t sfeQwiicOtos::getPosVelAcc(otos_pose2d_t &pos, otos_pose2d_t &vel, otos_pose2d_t &acc)
