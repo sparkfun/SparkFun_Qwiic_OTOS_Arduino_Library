@@ -30,9 +30,9 @@ void setup()
     // calibrateImu(), you can specify the number of samples to take and whether
     // to wait until the calibration is complete. If no parameters are provided,
     // it will take 255 samples and wait until done; each sample takes about
-    // 1.2ms, so about 306ms total
+    // 2.4ms, so about 612ms total
     myOtos.calibrateImu();
-    // myOtos.calibrateImu(255, true);
+    // myOtos.calibrateImu(255, true); // Or specify samples and whether to wait
 
     // Here we can set the linear and angular scalars, which can compensate for
     // scaling issues with the sensor measurements. Note that as of firmware

@@ -16,25 +16,53 @@ const uint8_t kOtosRegScalarH = 0x05;
 const uint8_t kOtosRegImuCalib = 0x06;
 const uint8_t kOtosRegReset = 0x07;
 const uint8_t kOtosRegSelfTest = 0x0E;
-const uint8_t kOtosRegStatus = 0x0F;
-const uint8_t kOtosRegPosXL = 0x10;
-const uint8_t kOtosRegPosXH = 0x11;
-const uint8_t kOtosRegPosYL = 0x12;
-const uint8_t kOtosRegPosYH = 0x13;
-const uint8_t kOtosRegPosHL = 0x14;
-const uint8_t kOtosRegPosHH = 0x15;
-const uint8_t kOtosRegVelXL = 0x16;
-const uint8_t kOtosRegVelXH = 0x17;
-const uint8_t kOtosRegVelYL = 0x18;
-const uint8_t kOtosRegVelYH = 0x19;
-const uint8_t kOtosRegVelHL = 0x1A;
-const uint8_t kOtosRegVelHH = 0x1B;
-const uint8_t kOtosRegAccXL = 0x1C;
-const uint8_t kOtosRegAccXH = 0x1D;
-const uint8_t kOtosRegAccYL = 0x1E;
-const uint8_t kOtosRegAccYH = 0x1F;
-const uint8_t kOtosRegAccHL = 0x20;
-const uint8_t kOtosRegAccHH = 0x21;
+
+const uint8_t kOtosRegOffXL = 0x10;
+const uint8_t kOtosRegOffXH = 0x11;
+const uint8_t kOtosRegOffYL = 0x12;
+const uint8_t kOtosRegOffYH = 0x13;
+const uint8_t kOtosRegOffHL = 0x14;
+const uint8_t kOtosRegOffHH = 0x15;
+
+const uint8_t kOtosRegStatus = 0x1F;
+
+const uint8_t kOtosRegPosXL = 0x20;
+const uint8_t kOtosRegPosXH = 0x21;
+const uint8_t kOtosRegPosYL = 0x22;
+const uint8_t kOtosRegPosYH = 0x23;
+const uint8_t kOtosRegPosHL = 0x24;
+const uint8_t kOtosRegPosHH = 0x25;
+const uint8_t kOtosRegVelXL = 0x26;
+const uint8_t kOtosRegVelXH = 0x27;
+const uint8_t kOtosRegVelYL = 0x28;
+const uint8_t kOtosRegVelYH = 0x29;
+const uint8_t kOtosRegVelHL = 0x2A;
+const uint8_t kOtosRegVelHH = 0x2B;
+const uint8_t kOtosRegAccXL = 0x2C;
+const uint8_t kOtosRegAccXH = 0x2D;
+const uint8_t kOtosRegAccYL = 0x2E;
+const uint8_t kOtosRegAccYH = 0x2F;
+const uint8_t kOtosRegAccHL = 0x30;
+const uint8_t kOtosRegAccHH = 0x31;
+
+const uint8_t kOtosRegPosStdXL = 0x32;
+const uint8_t kOtosRegPosStdXH = 0x33;
+const uint8_t kOtosRegPosStdYL = 0x34;
+const uint8_t kOtosRegPosStdYH = 0x35;
+const uint8_t kOtosRegPosStdHL = 0x36;
+const uint8_t kOtosRegPosStdHH = 0x37;
+const uint8_t kOtosRegVelStdXL = 0x38;
+const uint8_t kOtosRegVelStdXH = 0x39;
+const uint8_t kOtosRegVelStdYL = 0x3A;
+const uint8_t kOtosRegVelStdYH = 0x3B;
+const uint8_t kOtosRegVelStdHL = 0x3C;
+const uint8_t kOtosRegVelStdHH = 0x3D;
+const uint8_t kOtosRegAccStdXL = 0x3E;
+const uint8_t kOtosRegAccStdXH = 0x3F;
+const uint8_t kOtosRegAccStdYL = 0x40;
+const uint8_t kOtosRegAccStdYH = 0x41;
+const uint8_t kOtosRegAccStdHL = 0x42;
+const uint8_t kOtosRegAccStdHH = 0x43;
 
 // Product ID register value
 const uint8_t kOtosProductId = 0x5F;
@@ -133,11 +161,11 @@ class sfeQwiicOtos
 
     sfeTkError_t setAngularScalar(float scalar);
 
-    void getOffset(otos_pose2d_t &pose);
-
-    void setOffset(otos_pose2d_t &pose);
-
     sfeTkError_t resetTracking();
+
+    sfeTkError_t getOffset(otos_pose2d_t &pose);
+
+    sfeTkError_t setOffset(otos_pose2d_t &pose);
 
     sfeTkError_t getPosition(otos_pose2d_t &pose);
 
@@ -151,11 +179,17 @@ class sfeQwiicOtos
 
     sfeTkError_t setAccerlation(otos_pose2d_t &pose);
 
-    otos_pose2d_t transformPose(otos_pose2d_t &pose12, otos_pose2d_t &pose23);
+    sfeTkError_t getPosVelAcc(otos_pose2d_t &pos, otos_pose2d_t &vel, otos_pose2d_t &acc);
 
-    otos_pose2d_t invertPose(otos_pose2d_t &pose);
+    sfeTkError_t getPositionStdDev(otos_pose2d_t &pose);
 
-    float wrapAngle(float angle, otos_angular_unit_t unit = kOtosAngularUnitRadians);
+    sfeTkError_t getVelocityStdDev(otos_pose2d_t &pose);
+
+    sfeTkError_t getAccerlationStdDev(otos_pose2d_t &pose);
+
+    sfeTkError_t getPosVelAccStdDev(otos_pose2d_t &pos, otos_pose2d_t &vel, otos_pose2d_t &acc);
+
+    sfeTkError_t getPosVelAccAndStdDev(otos_pose2d_t &pos, otos_pose2d_t &vel, otos_pose2d_t &acc, otos_pose2d_t &posStdDev, otos_pose2d_t &velStdDev, otos_pose2d_t &accStdDev);
 
   protected:
     // Virtual function that must be implemented by the derived class to delay
@@ -167,6 +201,10 @@ class sfeQwiicOtos
 
     // Function to write raw pose registers and convert from specified units
     sfeTkError_t writePoseRegs(uint8_t reg, otos_pose2d_t &pose, float xyToRaw, float hToRaw);
+
+    void regsToPose(uint8_t *rawData, otos_pose2d_t &pose, float rawToXY, float rawToH);
+
+    void poseToRegs(uint8_t *rawData, otos_pose2d_t &pose, float xyToRaw, float hToRaw);
 
     // I2C bus to use for communication
     sfeTkII2C *_commBus;
@@ -181,9 +219,4 @@ class sfeQwiicOtos
     // angular units
     float _meterToUnit;
     float _radToUnit;
-
-    // Offset pose of the OTOS from the host, and its inverse. Stored internally
-    // in meters and radians
-    otos_pose2d_t _offsetPose;
-    otos_pose2d_t _offsetPoseInv;
 };

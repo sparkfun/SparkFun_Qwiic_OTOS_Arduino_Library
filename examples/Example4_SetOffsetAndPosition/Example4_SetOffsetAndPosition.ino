@@ -37,16 +37,12 @@ void setup()
     // Reset the tracking algorithm, making the sensor report it's at the origin
     myOtos.resetTracking();
 
-    // The OTOS sensor itself does not know about the offset defined above, it
-    // only tracks its own location; the offset is applied by the library when
-    // getPosition() is called. After resetting the tracking, the sensor will
-    // report that it's at the origin, but getPosition() will return the inverse
-    // of the offset pose. This can be resolved by calling setPosition(), which
-    // take into account the offset and set the sensor's location accordingly.
-    // Here we set the location to the origin, but any location is valid within
-    // the sensor's tracking range.
-    otos_pose2d_t newPose = {0, 0, 0};
-    myOtos.setPosition(newPose);
+    // After resetting the tracking, the OTOS will report that the robot is at
+    // the origin. If you know the starting coordinates of the robot, or have
+    // another source of location information (eg. vision odometry), you can set
+    // the OTOS location to match and it will continue to track from there.
+    otos_pose2d_t currentPosition = {0, 0, 0};
+    myOtos.setPosition(currentPosition);
 }
 
 void loop()

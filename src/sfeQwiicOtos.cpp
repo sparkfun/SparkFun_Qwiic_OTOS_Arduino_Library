@@ -5,14 +5,6 @@ sfeQwiicOtos::sfeQwiicOtos()
     // Set communication bus to nullptr
     _commBus = nullptr;
 
-    // Reset offset pose and its inverse to zero
-    _offsetPose.x = 0;
-    _offsetPose.y = 0;
-    _offsetPose.h = 0;
-    _offsetPoseInv.x = 0;
-    _offsetPoseInv.y = 0;
-    _offsetPoseInv.h = 0;
-
     // Set default units to inches and degrees
     _linearUnit = kOtosLinearUnitInches;
     _angularUnit = kOtosAngularUnitDegrees;
@@ -196,35 +188,10 @@ sfeTkError_t sfeQwiicOtos::setAngularScalar(float scalar)
         return kSTkErrFail;
     
     // Convert to raw integer, multiples of 0.1%
-    int8_t rawScalar = (scalar - 1.0f) * 1000;
+    uint8_t rawScalar = (int8_t)((scalar - 1.0f) * 1000);
 
     // Write the scalar to the device
-    return _commBus->writeRegisterByte(kOtosRegScalarH, (uint8_t)rawScalar);
-}
-
-void sfeQwiicOtos::setOffset(otos_pose2d_t &pose)
-{
-    // Copy the pose to the offset
-    _offsetPose = pose;
-
-    // Convert to meters and radians
-    _offsetPose.x /= _meterToUnit;
-    _offsetPose.y /= _meterToUnit;
-    _offsetPose.h /= _radToUnit;
-
-    // Compute the inverse of the offset
-    _offsetPoseInv = invertPose(_offsetPose);
-}
-
-void sfeQwiicOtos::getOffset(otos_pose2d_t &pose)
-{
-    // Copy the offset to the pose
-    pose = _offsetPose;
-
-    // Convert to current units
-    pose.x *= _meterToUnit;
-    pose.y *= _meterToUnit;
-    pose.h *= _radToUnit;
+    return _commBus->writeRegisterByte(kOtosRegScalarH, rawScalar);
 }
 
 sfeTkError_t sfeQwiicOtos::resetTracking()
@@ -233,39 +200,24 @@ sfeTkError_t sfeQwiicOtos::resetTracking()
     return _commBus->writeRegisterByte(kOtosRegReset, 0x01);
 }
 
+sfeTkError_t sfeQwiicOtos::getOffset(otos_pose2d_t &pose)
+{
+    return readPoseRegs(kOtosRegOffXL, pose, kInt16ToMeter, kInt16ToRad);
+}
+
+sfeTkError_t sfeQwiicOtos::setOffset(otos_pose2d_t &pose)
+{
+    return writePoseRegs(kOtosRegOffXL, pose, kMeterToInt16, kRadToInt16);
+}
+
 sfeTkError_t sfeQwiicOtos::getPosition(otos_pose2d_t &pose)
 {
-    // Read the raw pose data
-    otos_pose2d_t sensorPose;
-    sfeTkError_t err = readPoseRegs(kOtosRegPosXL, sensorPose, kInt16ToMeter, kInt16ToRad);
-    if(err != kSTkErrOk)
-        return err;
-    
-    // Apply the offset
-    pose = transformPose(sensorPose, _offsetPoseInv);
-
-    // Convert to current units
-    pose.x *= _meterToUnit;
-    pose.y *= _meterToUnit;
-    pose.h *= _radToUnit;
-
-    // Done!
-    return kSTkErrOk;
+    return readPoseRegs(kOtosRegPosXL, pose, kInt16ToMeter, kInt16ToRad);
 }
 
 sfeTkError_t sfeQwiicOtos::setPosition(otos_pose2d_t &pose)
 {
-    otos_pose2d_t sensorPose;
-    
-    // Convert to meters and radians
-    sensorPose.x = pose.x / _meterToUnit;
-    sensorPose.y = pose.y / _meterToUnit;
-    sensorPose.h = pose.h / _radToUnit;
-
-    // Apply the offset
-    sensorPose = transformPose(sensorPose, _offsetPose);
-
-    return writePoseRegs(kOtosRegPosXL, sensorPose, kMeterToInt16, kRadToInt16);
+    return writePoseRegs(kOtosRegPosXL, pose, kMeterToInt16, kRadToInt16);
 }
 
 sfeTkError_t sfeQwiicOtos::getVelocity(otos_pose2d_t &pose)
@@ -288,6 +240,28 @@ sfeTkError_t sfeQwiicOtos::setAccerlation(otos_pose2d_t &pose)
     return writePoseRegs(kOtosRegAccXL, pose, kMeterToInt16, kRpssToInt16);
 }
 
+sfeTkError_t sfeQwiicOtos::getPosVelAcc(otos_pose2d_t &pos, otos_pose2d_t &vel, otos_pose2d_t &acc)
+{
+    // Read all three pose registers
+    uint8_t rawData[18];
+    size_t bytesRead = 0;
+    sfeTkError_t err = _commBus->readRegisterRegion(kOtosRegPosXL, rawData, 18, bytesRead);
+    if(err != kSTkErrOk)
+        return err;
+
+    // Check if we read the correct number of bytes
+    if(bytesRead != 18)
+        return kSTkErrFail;
+
+    // Convert raw data to pose units
+    regsToPose(rawData, pos, kInt16ToMeter, kInt16ToRad);
+    regsToPose(rawData + 6, vel, kInt16ToMeter, kInt16ToRps);
+    regsToPose(rawData + 12, acc, kInt16ToMeter, kInt16ToRpss);
+
+    // Done!
+    return kSTkErrOk;
+}
+
 sfeTkError_t sfeQwiicOtos::readPoseRegs(uint8_t reg, otos_pose2d_t &pose, float rawToXY, float rawToH)
 {
     size_t bytesRead = 0;
@@ -295,20 +269,14 @@ sfeTkError_t sfeQwiicOtos::readPoseRegs(uint8_t reg, otos_pose2d_t &pose, float 
 
     // Attempt to read the raw pose data
     sfeTkError_t err = _commBus->readRegisterRegion(reg, rawData, 6, bytesRead);
-
-    // Check whether the read was successful
     if (err != kSTkErrOk)
         return err;
 
-    // Store raw data
-    int16_t rawX = (rawData[1] << 8) | rawData[0];
-    int16_t rawY = (rawData[3] << 8) | rawData[2];
-    int16_t rawH = (rawData[5] << 8) | rawData[4];
+    // Check if we read the correct number of bytes
+    if (bytesRead != 6)
+        return kSTkErrFail;
 
-    // Store in pose
-    pose.x = rawX * rawToXY;
-    pose.y = rawY * rawToXY;
-    pose.h = rawH * rawToH;
+    regsToPose(rawData, pose, rawToXY, rawToH);
 
     // Done!
     return kSTkErrOk;
@@ -316,128 +284,39 @@ sfeTkError_t sfeQwiicOtos::readPoseRegs(uint8_t reg, otos_pose2d_t &pose, float 
 
 sfeTkError_t sfeQwiicOtos::writePoseRegs(uint8_t reg, otos_pose2d_t &pose, float xyToRaw, float hToRaw)
 {
-    // Convert pose units to raw data
-    int16_t rawX = pose.x * xyToRaw;
-    int16_t rawY = pose.y * xyToRaw;
-    int16_t rawH = pose.h * hToRaw;
-    
     // Store raw data in a temporary buffer
-    uint8_t rawData[8];
+    uint8_t rawData[6];
+    poseToRegs(rawData, pose, xyToRaw, hToRaw);
+
+    // Write the raw data to the device
+    return _commBus->writeRegisterRegion(reg, rawData, 6);
+}
+
+void sfeQwiicOtos::regsToPose(uint8_t *rawData, otos_pose2d_t &pose, float rawToXY, float rawToH)
+{
+    // Store raw data
+    int16_t rawX = (rawData[1] << 8) | rawData[0];
+    int16_t rawY = (rawData[3] << 8) | rawData[2];
+    int16_t rawH = (rawData[5] << 8) | rawData[4];
+
+    // Store in pose and convert to units
+    pose.x = rawX * rawToXY * _meterToUnit;
+    pose.y = rawY * rawToXY * _meterToUnit;
+    pose.h = rawH * rawToH * _radToUnit;
+}
+
+void sfeQwiicOtos::poseToRegs(uint8_t *rawData, otos_pose2d_t &pose, float xyToRaw, float hToRaw)
+{
+    // Convert pose units to raw data
+    int16_t rawX = pose.x * xyToRaw / _meterToUnit;
+    int16_t rawY = pose.y * xyToRaw / _meterToUnit;
+    int16_t rawH = pose.h * hToRaw / _radToUnit;
+    
+    // Store raw data in buffer
     rawData[0] = rawX & 0xFF;
     rawData[1] = (rawX >> 8) & 0xFF;
     rawData[2] = rawY & 0xFF;
     rawData[3] = (rawY >> 8) & 0xFF;
     rawData[4] = rawH & 0xFF;
     rawData[5] = (rawH >> 8) & 0xFF;
-
-    // Write the raw data to the device
-    return _commBus->writeRegisterRegion(reg, rawData, 6);
-}
-
-otos_pose2d_t sfeQwiicOtos::transformPose(otos_pose2d_t &pose12, otos_pose2d_t &pose23)
-{
-    // We're going to compute this transformation as if the provided poses are
-    // homogeneous transformation matrices. For the 2D case, the transformation
-    // matrix is a 3x3 matrix T that looks like this:
-    //
-    //             [R11 R12 x]   [cos(h) -sin(h) x]
-    // T = [R d] = [R21 R22 y] = [sin(h)  cos(h) y]
-    //     [0 1]   [0   0   1]   [0       0      1]
-    //
-    // Where h is the heading and (x, y) is the translation from one frame to
-    // another. If we know the transformation from frame 1 to frame 2 (T12), and
-    // from frame 2 to frame 3 (T23), we can compute the transformation from
-    // frame 1 to frame 3 (T13) by multiplying the transformation matrices:
-    //
-    // T13 = T12 * T23
-    //
-    // Which expands to:
-    //
-    // [cos(h13) -sin(h13) x13]   [cos(h12) -sin(h12) x12]   [cos(h23) -sin(h23) x23]
-    // [sin(h13)  cos(h13) y13] = [sin(h12)  cos(h12) y12] * [sin(h23)  cos(h23) y23]
-    // [0         0        1  ]   [0         0        1  ]   [0         0        1  ]
-    //
-    // For the x13 and y13 components, this expands to:
-    //
-    // x13 = x23 * cos(h12) - y23 * sin(h12) + x12
-    // y13 = x23 * sin(h12) + y23 * cos(h12) + y12
-    //
-    // The upper left 2x2 corner is the resulting rotation matrix, where each
-    // component depends only on h13. The expansion for each element is one of:
-    //
-    // cos(h13) = cos(h12) * cos(h23) - sin(h12) * sin(h23)
-    // sin(h13) = sin(h12) * cos(h23) + cos(h12) * sin(h23)
-    //
-    // Instead of computing the inverse trigonometric functions, we can notice
-    // that these are just the angle addition identities, so we can simplify by
-    // just adding the angles:
-    //
-    // h1 = h2 + h3
-
-    // Create struct to hold output
-    otos_pose2d_t pose13;
-
-    // Pre-compute sin and cos
-    float cosh12 = cosf(pose12.h);
-    float sinh12 = sinf(pose12.h);
-
-    // Compute transformation following equations above
-    pose13.x = pose23.x * cosh12 - pose23.y * sinh12 + pose12.x;
-    pose13.y = pose23.x * sinh12 + pose23.y * cosh12 + pose12.y;
-    pose13.h = pose23.h + pose12.h;
-
-    // Wrap heading to +/- pi with fmod
-    pose13.h = wrapAngle(pose13.h);
-
-    // Done!
-    return pose13;
-}
-
-otos_pose2d_t sfeQwiicOtos::invertPose(otos_pose2d_t &pose)
-{
-    // Similar to transformPose(), we're going to compute this transformation as
-    // if the provided pose is a homogeneous transformation matrix T. The
-    // inverse of T is given by:
-    //
-    //                               [ cos(h) sin(h) -x*cos(h)-y*sin(h)]
-    // T^-1 = [R' d'] = [RT -RT*d] = [-sin(h) cos(h)  x*sin(h)-y*cos(h)]
-    //        [0  1 ]   [0   1   ]   [0       0       1                ]
-    //
-    // Where R' and d' are the inverse rotation matrix and position vector, and
-    // RT is the transpose of the rotation matrix. Solving for the inverse
-    // position vector, we get:
-    //
-    // x' = -x * cos(h) - y * sin(h)
-    // y' =  x * sin(h) - y * cos(h)
-    //
-    // The expansion for the inverse rotation matrix elements are one of:
-    //
-    // cos(h') =  cos(h)
-    // sin(h') = -sin(h)
-    //
-    // Instead of computing the inverse trigonometric functions, we can notice
-    // that h' and h must be opposite angles, so we can simplify:
-    //
-    // h' = -h
-
-    // Create struct to hold output
-    otos_pose2d_t poseInv;
-
-    // Pre-compute sin and cos
-    float cosh = cosf(pose.h);
-    float sinh = sinf(pose.h);
-
-    // Compute inverse following equations above
-    poseInv.x = -pose.x * cosh - pose.y * sinh;
-    poseInv.y = pose.x * sinh - pose.y * cosh;
-    poseInv.h = -pose.h;
-
-    // Done!
-    return poseInv;
-}
-
-float sfeQwiicOtos::wrapAngle(float angle, otos_angular_unit_t unit)
-{
-    float bound = (unit == kOtosAngularUnitRadians) ? M_PI : 180.0;
-    return fmodf(angle + bound, 2 * bound) - bound;
 }
