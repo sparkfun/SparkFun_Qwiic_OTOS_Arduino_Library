@@ -45,9 +45,13 @@ void loop()
     // Read the standard deviation of the tracking. Note that these values are
     // just the square root of the diagonal elements of the covariance matrices
     // of the Kalman filters used in the firmware of the OTOS, and THEY DO NOT
-    // REPRESENT THE ACTUAL TRACKING ERROR! These values are provided primarily
-    // for anyone wanting to do sensor fusion with additional sensors, but they
-    // can be used to at least get an idea of the quality of the tracking.
+    // REPRESENT THE ACTUAL TRACKING ERROR! These are statistical quantities
+    // that assume a correct model of the system, but there could be unmodelled
+    // error sources that cause the physical error to become larger than these
+    // statistical error (eg. improper calibration, or rotating the OTOS to not
+    // be flat against the tracking surface). These are provided primarily for
+    // anyone wanting to perform sensor fusion with additional sensors, but they
+    // can be used to at least "get an idea" of the quality of the accuracy.
     myOtos.getPositionStdDev(posStdDev);
     // myOtos.getVelocityStdDev(velStdDev);
     // myOtos.getAccerlationStdDev(accStdDev);
