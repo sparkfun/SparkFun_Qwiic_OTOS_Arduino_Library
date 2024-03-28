@@ -175,13 +175,13 @@ class sfeQwiicOtos
 
     sfeTkError_t getAccerlation(otos_pose2d_t &pose);
 
-    sfeTkError_t getPosVelAcc(otos_pose2d_t &pos, otos_pose2d_t &vel, otos_pose2d_t &acc);
-
     sfeTkError_t getPositionStdDev(otos_pose2d_t &pose);
 
     sfeTkError_t getVelocityStdDev(otos_pose2d_t &pose);
 
     sfeTkError_t getAccerlationStdDev(otos_pose2d_t &pose);
+
+    sfeTkError_t getPosVelAcc(otos_pose2d_t &pos, otos_pose2d_t &vel, otos_pose2d_t &acc);
 
     sfeTkError_t getPosVelAccStdDev(otos_pose2d_t &pos, otos_pose2d_t &vel, otos_pose2d_t &acc);
 

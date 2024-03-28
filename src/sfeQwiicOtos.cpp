@@ -230,9 +230,24 @@ sfeTkError_t sfeQwiicOtos::getAccerlation(otos_pose2d_t &pose)
     return readPoseRegs(kOtosRegAccXL, pose, kInt16ToMeter, kInt16ToRpss);
 }
 
+sfeTkError_t sfeQwiicOtos::getPositionStdDev(otos_pose2d_t &pose)
+{
+    return readPoseRegs(kOtosRegPosStdXL, pose, kInt16ToMeter, kInt16ToRad);
+}
+
+sfeTkError_t sfeQwiicOtos::getVelocityStdDev(otos_pose2d_t &pose)
+{
+    return readPoseRegs(kOtosRegVelStdXL, pose, kInt16ToMeter, kInt16ToRps);
+}
+
+sfeTkError_t sfeQwiicOtos::getAccerlationStdDev(otos_pose2d_t &pose)
+{
+    return readPoseRegs(kOtosRegAccStdXL, pose, kInt16ToMeter, kInt16ToRpss);
+}
+
 sfeTkError_t sfeQwiicOtos::getPosVelAcc(otos_pose2d_t &pos, otos_pose2d_t &vel, otos_pose2d_t &acc)
 {
-    // Read all three pose registers
+    // Read all pose registers
     uint8_t rawData[18];
     size_t bytesRead = 0;
     sfeTkError_t err = _commBus->readRegisterRegion(kOtosRegPosXL, rawData, 18, bytesRead);
@@ -247,6 +262,53 @@ sfeTkError_t sfeQwiicOtos::getPosVelAcc(otos_pose2d_t &pos, otos_pose2d_t &vel, 
     regsToPose(rawData, pos, kInt16ToMeter, kInt16ToRad);
     regsToPose(rawData + 6, vel, kInt16ToMeter, kInt16ToRps);
     regsToPose(rawData + 12, acc, kInt16ToMeter, kInt16ToRpss);
+
+    // Done!
+    return kSTkErrOk;
+}
+
+sfeTkError_t sfeQwiicOtos::getPosVelAccStdDev(otos_pose2d_t &pos, otos_pose2d_t &vel, otos_pose2d_t &acc)
+{
+    // Read all pose registers
+    uint8_t rawData[18];
+    size_t bytesRead = 0;
+    sfeTkError_t err = _commBus->readRegisterRegion(kOtosRegPosStdXL, rawData, 18, bytesRead);
+    if(err != kSTkErrOk)
+        return err;
+
+    // Check if we read the correct number of bytes
+    if(bytesRead != 18)
+        return kSTkErrFail;
+
+    // Convert raw data to pose units
+    regsToPose(rawData, pos, kInt16ToMeter, kInt16ToRad);
+    regsToPose(rawData + 6, vel, kInt16ToMeter, kInt16ToRps);
+    regsToPose(rawData + 12, acc, kInt16ToMeter, kInt16ToRpss);
+
+    // Done!
+    return kSTkErrOk;
+}
+
+sfeTkError_t sfeQwiicOtos::getPosVelAccAndStdDev(otos_pose2d_t &pos, otos_pose2d_t &vel, otos_pose2d_t &acc, otos_pose2d_t &posStdDev, otos_pose2d_t &velStdDev, otos_pose2d_t &accStdDev)
+{
+    // Read all pose registers
+    uint8_t rawData[36];
+    size_t bytesRead = 0;
+    sfeTkError_t err = _commBus->readRegisterRegion(kOtosRegPosXL, rawData, 36, bytesRead);
+    if(err != kSTkErrOk)
+        return err;
+
+    // Check if we read the correct number of bytes
+    if(bytesRead != 36)
+        return kSTkErrFail;
+
+    // Convert raw data to pose units
+    regsToPose(rawData, pos, kInt16ToMeter, kInt16ToRad);
+    regsToPose(rawData + 6, vel, kInt16ToMeter, kInt16ToRps);
+    regsToPose(rawData + 12, acc, kInt16ToMeter, kInt16ToRpss);
+    regsToPose(rawData + 18, posStdDev, kInt16ToMeter, kInt16ToRad);
+    regsToPose(rawData + 24, velStdDev, kInt16ToMeter, kInt16ToRps);
+    regsToPose(rawData + 30, accStdDev, kInt16ToMeter, kInt16ToRpss);
 
     // Done!
     return kSTkErrOk;
