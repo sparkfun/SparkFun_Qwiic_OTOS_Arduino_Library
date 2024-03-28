@@ -8,7 +8,7 @@ void setup()
 {
     // Start serial
     Serial.begin(115200);
-    Serial.println("Qwiic OTOS Example 5 - Velocity and Acceleration");
+    Serial.println("Qwiic OTOS Example 6 - Standard Deviation");
 
     Wire.begin();
 
