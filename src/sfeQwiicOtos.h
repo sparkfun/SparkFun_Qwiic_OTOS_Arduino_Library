@@ -15,7 +15,7 @@ const uint8_t kOtosRegScalarXY = 0x04;
 const uint8_t kOtosRegScalarH = 0x05;
 const uint8_t kOtosRegImuCalib = 0x06;
 const uint8_t kOtosRegReset = 0x07;
-const uint8_t kOtosRegSelfTest = 0x0E;
+const uint8_t kOtosRegSelfTest = 0x0F;
 
 const uint8_t kOtosRegOffXL = 0x10;
 const uint8_t kOtosRegOffXH = 0x11;
@@ -126,6 +126,19 @@ typedef union {
     uint8_t value;
 } otos_version_t;
 
+// Self test register bit fields
+typedef union {
+    struct
+    {
+        uint8_t start : 1;
+        uint8_t inProgress : 1;
+        uint8_t pass : 1;
+        uint8_t fail : 1;
+        uint8_t reserved : 4;
+    };
+    uint8_t value;
+} sfe_otos_config_self_test_t;
+
 class sfeQwiicOtos
 {
   public:
@@ -142,6 +155,8 @@ class sfeQwiicOtos
     sfeTkError_t isConnected();
 
     sfeTkError_t getVersionInfo(otos_version_t &hwVersion, otos_version_t &fwVersion);
+
+    sfeTkError_t selfTest();
 
     sfeTkError_t calibrateImu(uint8_t numSamples = 255, bool waitUntilDone = true);
 

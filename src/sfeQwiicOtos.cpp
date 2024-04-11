@@ -73,6 +73,37 @@ sfeTkError_t sfeQwiicOtos::getVersionInfo(otos_version_t &hwVersion, otos_versio
     return kSTkErrOk;
 }
 
+sfeTkError_t sfeQwiicOtos::selfTest()
+{
+    // Write the self-test register to start the test
+    sfe_otos_config_self_test_t selfTest;
+    selfTest.start = 1;
+    sfeTkError_t err = _commBus->writeRegisterByte(kOtosRegSelfTest, selfTest.value);
+    if(err != kSTkErrOk)
+        return err;
+
+    // Loop until self-test is done, should only take ~20ms as of firmware v1.0
+    for(int i = 0; i < 10; i++)
+    {
+        // Give a short delay between reads
+        delayMs(5);
+
+        // Read the self-test register
+        err = _commBus->readRegisterByte(kOtosRegSelfTest, selfTest.value);
+        if(err != kSTkErrOk)
+            return err;
+        
+        // Check if the self-test is done
+        if(selfTest.inProgress == 0)
+        {
+            break;
+        }
+    }
+
+    // Check if the self-test passed
+    return (selfTest.pass == 1) ? kSTkErrOk : kSTkErrFail;
+}
+
 sfeTkError_t sfeQwiicOtos::calibrateImu(uint8_t numSamples, bool waitUntilDone)
 {
     // Write the number of samples to the device
