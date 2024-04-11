@@ -37,7 +37,7 @@ void loop()
     // These values can be read individually like so:
     myOtos.getPosition(pos);
     myOtos.getVelocity(vel);
-    myOtos.getAccerlation(acc);
+    myOtos.getAcceleration(acc);
 
     // Or all at once with the following:
     // myOtos.getPosVelAcc(pos, vel, acc);

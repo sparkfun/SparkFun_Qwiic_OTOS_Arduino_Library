@@ -40,7 +40,7 @@ void loop()
     // Read the position like normal (and velocity and acceleration if desired)
     myOtos.getPosition(pos);
     // myOtos.getVelocity(vel);
-    // myOtos.getAccerlation(acc);
+    // myOtos.getAcceleration(acc);
 
     // Read the standard deviation of the tracking. Note that these values are
     // just the square root of the diagonal elements of the covariance matrices
@@ -54,7 +54,7 @@ void loop()
     // can be used to at least "get an idea" of the quality of the accuracy.
     myOtos.getPositionStdDev(posStdDev);
     // myOtos.getVelocityStdDev(velStdDev);
-    // myOtos.getAccerlationStdDev(accStdDev);
+    // myOtos.getAccelerationStdDev(accStdDev);
 
     // These values can instead be read out in chunks:
     // myOtos.getPosVelAcc(pos, vel, acc);

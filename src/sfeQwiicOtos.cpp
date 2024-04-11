@@ -225,7 +225,7 @@ sfeTkError_t sfeQwiicOtos::getVelocity(otos_pose2d_t &pose)
     return readPoseRegs(kOtosRegVelXL, pose, kInt16ToMeter, kInt16ToRps);
 }
 
-sfeTkError_t sfeQwiicOtos::getAccerlation(otos_pose2d_t &pose)
+sfeTkError_t sfeQwiicOtos::getAcceleration(otos_pose2d_t &pose)
 {
     return readPoseRegs(kOtosRegAccXL, pose, kInt16ToMeter, kInt16ToRpss);
 }
@@ -240,7 +240,7 @@ sfeTkError_t sfeQwiicOtos::getVelocityStdDev(otos_pose2d_t &pose)
     return readPoseRegs(kOtosRegVelStdXL, pose, kInt16ToMeter, kInt16ToRps);
 }
 
-sfeTkError_t sfeQwiicOtos::getAccerlationStdDev(otos_pose2d_t &pose)
+sfeTkError_t sfeQwiicOtos::getAccelerationStdDev(otos_pose2d_t &pose)
 {
     return readPoseRegs(kOtosRegAccStdXL, pose, kInt16ToMeter, kInt16ToRpss);
 }
