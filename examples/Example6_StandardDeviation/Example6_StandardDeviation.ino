@@ -1,3 +1,9 @@
+/*
+    SPDX-License-Identifier: MIT
+    
+    Copyright (c) 2024 SparkFun Electronics
+*/
+
 #include "SparkFun_Qwiic_OTOS_Arduino_Library.h"
 #include "Wire.h"
 

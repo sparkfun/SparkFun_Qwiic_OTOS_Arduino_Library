@@ -1,3 +1,9 @@
+/*
+    SPDX-License-Identifier: MIT
+    
+    Copyright (c) 2024 SparkFun Electronics
+*/
+
 #include "sfeQwiicOtos.h"
 
 sfeQwiicOtos::sfeQwiicOtos()
