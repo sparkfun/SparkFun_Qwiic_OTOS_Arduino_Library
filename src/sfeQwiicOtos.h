@@ -21,6 +21,8 @@ const uint8_t kOtosRegScalarXY = 0x04;
 const uint8_t kOtosRegScalarH = 0x05;
 const uint8_t kOtosRegImuCalib = 0x06;
 const uint8_t kOtosRegReset = 0x07;
+
+const uint8_t kOtosRegSignalProcess = 0x0E;
 const uint8_t kOtosRegSelfTest = 0x0F;
 
 const uint8_t kOtosRegOffXL = 0x10;
@@ -132,6 +134,18 @@ typedef union {
     uint8_t value;
 } otos_version_t;
 
+// Signal process register bit fields
+typedef union {
+    struct
+    {
+        uint8_t enLut : 1;
+        uint8_t enAcc : 1;
+        uint8_t enRot : 1;
+        uint8_t reserved : 5;
+    };
+    uint8_t value;
+} sfe_otos_config_signal_process_t;
+
 // Self test register bit fields
 typedef union {
     struct
@@ -183,6 +197,10 @@ class sfeQwiicOtos
     sfeTkError_t setAngularScalar(float scalar);
 
     sfeTkError_t resetTracking();
+
+    sfeTkError_t getSignalProcess(sfe_otos_config_signal_process_t &config);
+
+    sfeTkError_t setSignalProcess(sfe_otos_config_signal_process_t &config);
 
     sfeTkError_t getOffset(otos_pose2d_t &pose);
 

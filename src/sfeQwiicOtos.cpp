@@ -237,6 +237,18 @@ sfeTkError_t sfeQwiicOtos::resetTracking()
     return _commBus->writeRegisterByte(kOtosRegReset, 0x01);
 }
 
+sfeTkError_t sfeQwiicOtos::getSignalProcess(sfe_otos_config_signal_process_t &config)
+{
+    // Read the signal process register
+    return _commBus->readRegisterByte(kOtosRegSignalProcess, config.value);
+}
+
+sfeTkError_t sfeQwiicOtos::setSignalProcess(sfe_otos_config_signal_process_t &config)
+{
+    // Write the signal process register
+    return _commBus->writeRegisterByte(kOtosRegSignalProcess, config.value);
+}
+
 sfeTkError_t sfeQwiicOtos::getOffset(otos_pose2d_t &pose)
 {
     return readPoseRegs(kOtosRegOffXL, pose, kInt16ToMeter, kInt16ToRad);
