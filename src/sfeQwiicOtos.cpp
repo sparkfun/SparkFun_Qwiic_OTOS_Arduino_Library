@@ -254,6 +254,11 @@ sfeTkError_t sfeQwiicOtos::getOffset(otos_pose2d_t &pose)
     return readPoseRegs(kOtosRegOffXL, pose, kInt16ToMeter, kInt16ToRad);
 }
 
+sfeTkError_t sfeQwiicOtos::getStatus(sfe_otos_status_t &status)
+{
+    return _commBus->readRegisterByte(kOtosRegStatus, status.value);
+}
+
 sfeTkError_t sfeQwiicOtos::setOffset(otos_pose2d_t &pose)
 {
     return writePoseRegs(kOtosRegOffXL, pose, kMeterToInt16, kRadToInt16);

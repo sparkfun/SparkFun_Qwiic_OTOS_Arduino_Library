@@ -159,6 +159,19 @@ typedef union {
     uint8_t value;
 } sfe_otos_config_self_test_t;
 
+// Status register bit fields
+typedef union {
+    struct
+    {
+        uint8_t warnTiltAngle : 1;
+        uint8_t warnOpticalTracking : 1;
+        uint8_t reserved : 4;
+        uint8_t errorPaa : 1;
+        uint8_t errorLsm : 1;
+    };
+    uint8_t value;
+} sfe_otos_status_t;
+
 class sfeQwiicOtos
 {
   public:
@@ -201,6 +214,8 @@ class sfeQwiicOtos
     sfeTkError_t getSignalProcess(sfe_otos_config_signal_process_t &config);
 
     sfeTkError_t setSignalProcess(sfe_otos_config_signal_process_t &config);
+
+    sfeTkError_t getStatus(sfe_otos_status_t &status);
 
     sfeTkError_t getOffset(otos_pose2d_t &pose);
 
