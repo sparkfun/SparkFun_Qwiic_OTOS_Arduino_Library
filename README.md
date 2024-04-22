@@ -16,9 +16,8 @@ Repository Contents
 
 Documentation
 --------------
-* **[GitHub Repo](https://github.com/sparkfun/TODO)** - TODO: Update URL and description
-* **[Hookup Guide](http://docs.sparkfun.com/TODO/)** - TODO: Update URL and description
-
+* **[GitHub Repo](https://github.com/sparkfun/SparkFun_Optical_Tracking_Odometry_Sensor)** - Hardware Library for the SparkFyn Optical Tracking Odometry Sensor
+* **[Hookup Guide](https://docs.sparkfun.com/SparkFun_Optical_Tracking_Odometry_Sensor)** - Hookup Guide for the SparkFyn Optical Tracking Odometry Sensor
 License Information
 -------------------
 
