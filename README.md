@@ -1,11 +1,11 @@
-# SparkFun_Template_Arduino_Library
+# SparkFun Qwiic OTOS Arduino Library
 ========================================
 
 <table class="table table-hover table-striped table-bordered">
     <p> TODO: Add product photos and links </p>
 </table>
 
-TODO: Add description of product and library
+This thing is awesome. Get it. Get it now!
 
 Repository Contents
 -------------------
