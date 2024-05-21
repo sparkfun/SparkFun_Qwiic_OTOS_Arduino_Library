@@ -20,76 +20,137 @@
 #include <math.h>
 #include <stdint.h>
 
+/// @struct sfe_otos_pose2d_t
 /// @brief 2D pose structure, including x and y coordinates and heading angle
 /// @note Although pose is traditionally used for position and orientation, this
 /// structure is also used for velocity and accleration by the OTOS driver
 typedef struct
 {
+    /// @brief X value
     float x;
+
+    /// @brief Y value
     float y;
+
+    /// @brief Heading value
     float h;
 } sfe_otos_pose2d_t;
 
-/// @brief Enumerations for the linear units
+/// @enum sfe_otos_linear_unit_t
+/// @brief Enumerations for linear units used by the OTOS driver
 typedef enum
 {
+    /// @brief Meters
     kSfeOtosLinearUnitMeters = 0,
+
+    /// @brief Inches (default)
     kSfeOtosLinearUnitInches = 1
 } sfe_otos_linear_unit_t;
 
-/// @brief Enumerations for the angular units
+/// @enum sfe_otos_angular_unit_t
+/// @brief Enumerations for angular units used by the OTOS driver
 typedef enum
 {
+    /// @brief Radians
     kSfeOtosAngularUnitRadians = 0,
+
+    /// @brief Degrees (default)
     kSfeOtosAngularUnitDegrees = 1
 } sfe_otos_angular_unit_t;
 
+/// @union sfe_otos_version_t
 /// @brief Version register bit fields
 typedef union {
     struct
     {
+        /// @brief Minor version number
         uint8_t minor : 4;
+
+        /// @brief Major version number
         uint8_t major : 4;
     };
+
+    /// @brief Raw register value
     uint8_t value;
 } sfe_otos_version_t;
 
+/// @union sfe_otos_signal_process_config_t
 /// @brief Signal process config register bit fields
 typedef union {
     struct
     {
+        /// @brief Whether to use the internal lookup table calibration for the
+        /// optical sensor
         uint8_t enLut : 1;
+
+        /// @brief Whether to feed the accelerometer data to the Kalman filters
         uint8_t enAcc : 1;
+
+        /// @brief Whether to rotate the IMU and optical sensor data by the
+        /// heading angle
         uint8_t enRot : 1;
+
+        /// @brief Whether to use the correct sensor variance in the Kalman
+        /// filters, or use 0 varaince to effectively disable the filters
         uint8_t enVar : 1;
+
+        /// @brief Reserved bits, do not use
         uint8_t reserved : 4;
     };
+
+    /// @brief Raw register value
     uint8_t value;
 } sfe_otos_signal_process_config_t;
 
+/// @union sfe_otos_self_test_config_t
 /// @brief Self test register bit fields
 typedef union {
     struct
     {
+        /// @brief Write 1 to start the self test
         uint8_t start : 1;
+        
+        /// @brief Returns 1 while the self test is in progress
         uint8_t inProgress : 1;
+        
+        /// @brief Returns 1 if the self test passed
         uint8_t pass : 1;
+        
+        /// @brief Returns 1 if the self test failed
         uint8_t fail : 1;
+        
+        /// @brief Reserved bits, do not use
         uint8_t reserved : 4;
     };
+    
+    /// @brief Raw register value
     uint8_t value;
 } sfe_otos_self_test_config_t;
 
+/// @union sfe_otos_status_t
 /// @brief Status register bit fields
 typedef union {
     struct
     {
+        /// @brief Returns 1 if the tilt angle threshold has been exceeded.
+        /// While set, the accelerometer data is ignored
         uint8_t warnTiltAngle : 1;
+
+        /// @brief Returns 1 if the optical tracking is unreliable. While set,
+        /// only the IMU data is used for tracking unless warnTiltAngle is set
         uint8_t warnOpticalTracking : 1;
+
+        /// @brief Reserved bits, do not use
         uint8_t reserved : 4;
+
+        /// @brief Returns 1 if the optical sensor has a fatal error
         uint8_t errorPaa : 1;
+
+        /// @brief Returns 1 if the IMU has a fatal error
         uint8_t errorLsm : 1;
     };
+
+    /// @brief Raw register value
     uint8_t value;
 } sfe_otos_status_t;
 
