@@ -20,7 +20,7 @@ class QwiicOTOS : public sfeQwiicOtos
     bool begin(TwoWire &wirePort = Wire)
     {
         // Setup Arduino I2C bus
-        _theI2CBus.init(wirePort, kOtosDefaultAddress);
+        _theI2CBus.init(wirePort, kDefaultAddress);
 
         // Begin the sensor
         return sfeQwiicOtos::begin(&_theI2CBus) == kSTkErrOk;
