@@ -304,8 +304,10 @@ class sfeQwiicOtos
     // Function to write raw pose registers and convert from specified units
     sfeTkError_t writePoseRegs(uint8_t reg, sfe_otos_pose2d_t &pose, float xyToRaw, float hToRaw);
 
+    // Function to convert raw pose registers to a pose structure
     void regsToPose(uint8_t *rawData, sfe_otos_pose2d_t &pose, float rawToXY, float rawToH);
 
+    // Function to convert a pose structure to raw pose registers
     void poseToRegs(uint8_t *rawData, sfe_otos_pose2d_t &pose, float xyToRaw, float hToRaw);
 
     // I2C bus to use for communication
