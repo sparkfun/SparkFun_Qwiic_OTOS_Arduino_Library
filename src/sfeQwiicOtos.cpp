@@ -110,6 +110,9 @@ sfeTkError_t sfeQwiicOtos::calibrateImu(uint8_t numSamples, bool waitUntilDone)
     if(err != kSTkErrOk)
         return err;
     
+    // Wait 1 sample period (2.4ms) to ensure the register updates
+    delayMs(3);
+    
     // Do we need to wait until the calibration finishes?
     if(!waitUntilDone)
         return kSTkErrOk;
@@ -119,11 +122,6 @@ sfeTkError_t sfeQwiicOtos::calibrateImu(uint8_t numSamples, bool waitUntilDone)
     // of read attempts
     for(uint8_t numAttempts = numSamples; numAttempts > 0; numAttempts--)
     {
-        // Give a short delay between reads. As of firmware v1.0, samples take
-        // 2.4ms each, so 3ms should guarantee the next sample is done. This
-        // also ensures the max attempts is not exceeded in normal operation
-        delayMs(3);
-
         // Read the gryo calibration register value
         uint8_t calibrationValue;
         err = _commBus->readRegisterByte(kRegImuCalib, calibrationValue);
@@ -133,10 +131,21 @@ sfeTkError_t sfeQwiicOtos::calibrateImu(uint8_t numSamples, bool waitUntilDone)
         // Check if calibration is done
         if(calibrationValue == 0)
             return kSTkErrOk;
+
+        // Give a short delay between reads. As of firmware v1.0, samples take
+        // 2.4ms each, so 3ms should guarantee the next sample is done. This
+        // also ensures the max attempts is not exceeded in normal operation
+        delayMs(3);
     }
 
     // Max number of attempts reached, calibration failed
     return kSTkErrFail;
+}
+
+sfeTkError_t sfeQwiicOtos::getImuCalibrationProgress(uint8_t &numSamples)
+{
+    // Read the IMU calibration register
+    return _commBus->readRegisterByte(kRegImuCalib, numSamples);
 }
 
 sfe_otos_linear_unit_t sfeQwiicOtos::getLinearUnit()

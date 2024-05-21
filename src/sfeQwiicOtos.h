@@ -102,6 +102,8 @@ class sfeQwiicOtos
 
     sfeTkError_t calibrateImu(uint8_t numSamples = 255, bool waitUntilDone = true);
 
+    sfeTkError_t getImuCalibrationProgress(uint8_t &numSamples);
+
     sfe_otos_linear_unit_t getLinearUnit();
 
     void setLinearUnit(sfe_otos_linear_unit_t unit);
