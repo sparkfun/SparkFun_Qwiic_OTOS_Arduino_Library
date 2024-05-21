@@ -122,9 +122,9 @@ class sfeQwiicOtos
 
     sfeTkError_t resetTracking();
 
-    sfeTkError_t getSignalProcess(sfe_otos_signal_process_config_t &config);
+    sfeTkError_t getSignalProcessConfig(sfe_otos_signal_process_config_t &config);
 
-    sfeTkError_t setSignalProcess(sfe_otos_signal_process_config_t &config);
+    sfeTkError_t setSignalProcessConfig(sfe_otos_signal_process_config_t &config);
 
     sfeTkError_t getStatus(sfe_otos_status_t &status);
 

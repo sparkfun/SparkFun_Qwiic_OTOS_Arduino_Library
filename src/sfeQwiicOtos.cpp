@@ -246,26 +246,26 @@ sfeTkError_t sfeQwiicOtos::resetTracking()
     return _commBus->writeRegisterByte(kRegReset, 0x01);
 }
 
-sfeTkError_t sfeQwiicOtos::getSignalProcess(sfe_otos_signal_process_config_t &config)
+sfeTkError_t sfeQwiicOtos::getSignalProcessConfig(sfe_otos_signal_process_config_t &config)
 {
     // Read the signal process register
     return _commBus->readRegisterByte(kRegSignalProcess, config.value);
 }
 
-sfeTkError_t sfeQwiicOtos::setSignalProcess(sfe_otos_signal_process_config_t &config)
+sfeTkError_t sfeQwiicOtos::setSignalProcessConfig(sfe_otos_signal_process_config_t &config)
 {
     // Write the signal process register
     return _commBus->writeRegisterByte(kRegSignalProcess, config.value);
 }
 
-sfeTkError_t sfeQwiicOtos::getOffset(sfe_otos_pose2d_t &pose)
-{
-    return readPoseRegs(kRegOffXL, pose, kInt16ToMeter, kInt16ToRad);
-}
-
 sfeTkError_t sfeQwiicOtos::getStatus(sfe_otos_status_t &status)
 {
     return _commBus->readRegisterByte(kRegStatus, status.value);
+}
+
+sfeTkError_t sfeQwiicOtos::getOffset(sfe_otos_pose2d_t &pose)
+{
+    return readPoseRegs(kRegOffXL, pose, kInt16ToMeter, kInt16ToRad);
 }
 
 sfeTkError_t sfeQwiicOtos::setOffset(sfe_otos_pose2d_t &pose)
