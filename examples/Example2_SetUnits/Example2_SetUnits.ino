@@ -26,37 +26,52 @@ void setup()
     }
 
     Serial.println("OTOS connected!");
-    
+
+    Serial.println("Ensure the OTOS is flat and stationary, then enter any key to calibrate the IMU");
+
+    // Clear the serial buffer
+    while (Serial.available())
+        Serial.read();
+    // Wait for user input
+    while (!Serial.available())
+        ;
+
+    Serial.println("Calibrating IMU...");
+
+    // Calibrate the IMU, which removes the accelerometer and gyroscope offsets
+    myOtos.calibrateImu();
+
     // Set the desired units for linear and angular measurements. Can be either
     // meters or inches for linear, and radians or degrees for angular. If not
     // set, the default is inches and degrees. Note that this setting is not
     // stored in the sensor, it's part of the library, so you need to set at the
     // start of all your programs.
-    myOtos.setLinearUnit(kOtosLinearUnitMeters);
-    // myOtos.setLinearUnit(kOtosLinearUnitInches);
-    myOtos.setAngularUnit(kOtosAngularUnitRadians);
-    // myOtos.setAngularUnit(kOtosAngularUnitDegrees);
+    myOtos.setLinearUnit(kSfeOtosLinearUnitMeters);
+    // myOtos.setLinearUnit(kSfeOtosLinearUnitInches);
+    myOtos.setAngularUnit(kSfeOtosAngularUnitRadians);
+    // myOtos.setAngularUnit(kSfeOtosAngularUnitDegrees);
 
-    // Reset the tracking algorithm, making the sensor report it's at the origin
+    // Reset the tracking algorithm - this resets the position to the origin,
+    // but can also be used to recover from some rare tracking errors
     myOtos.resetTracking();
 }
 
 void loop()
 {
-    // Get the latest sensor pose, which includes the x and y coordinates, plus
-    // the heading angle
-    otos_pose2d_t otosPose;
-    myOtos.getPosition(otosPose);
+    // Get the latest position, which includes the x and y coordinates, plus the
+    // heading angle
+    sfe_otos_pose2d_t myPosition;
+    myOtos.getPosition(myPosition);
 
     // Print measurement
     Serial.println();
-    Serial.println("Sensor pose:");
+    Serial.println("Position:");
     Serial.print("X (Meters): ");
-    Serial.println(otosPose.x, 4);
+    Serial.println(myPosition.x, 4);
     Serial.print("Y (Meters): ");
-    Serial.println(otosPose.y, 4);
+    Serial.println(myPosition.y, 4);
     Serial.print("Heading (Radians): ");
-    Serial.println(otosPose.h, 4);
+    Serial.println(myPosition.h, 4);
 
     // Wait a bit so we don't spam the serial port
     delay(500);

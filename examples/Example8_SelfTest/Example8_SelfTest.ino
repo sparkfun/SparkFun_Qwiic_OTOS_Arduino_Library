@@ -27,6 +27,8 @@ void setup()
 
     Serial.println("OTOS connected!");
 
+    Serial.println("The OTOS must be stationary during the self test!");
+
     // Perform the self test
     sfeTkError_t result = myOtos.selfTest();
     

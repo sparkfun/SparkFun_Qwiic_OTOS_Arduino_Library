@@ -28,17 +28,32 @@ void setup()
     }
 
     Serial.println("OTOS connected!");
-    
-    // Reset the tracking algorithm, making the sensor report it's at the origin
+
+    Serial.println("Ensure the OTOS is flat and stationary, then enter any key to calibrate the IMU");
+
+    // Clear the serial buffer
+    while (Serial.available())
+        Serial.read();
+    // Wait for user input
+    while (!Serial.available())
+        ;
+
+    Serial.println("Calibrating IMU...");
+
+    // Calibrate the IMU, which removes the accelerometer and gyroscope offsets
+    myOtos.calibrateImu();
+
+    // Reset the tracking algorithm - this resets the position to the origin,
+    // but can also be used to recover from some rare tracking errors
     myOtos.resetTracking();
 }
 
 void loop()
 {
     // Create structs for position, velocity, and acceleration
-    otos_pose2d_t pos;
-    otos_pose2d_t vel;
-    otos_pose2d_t acc;
+    sfe_otos_pose2d_t pos;
+    sfe_otos_pose2d_t vel;
+    sfe_otos_pose2d_t acc;
     
     // These values can be read individually like so:
     myOtos.getPosition(pos);

@@ -26,6 +26,17 @@ void setup()
     }
 
     Serial.println("OTOS connected!");
+
+    Serial.println("Ensure the OTOS is flat and stationary, then enter any key to calibrate the IMU");
+
+    // Clear the serial buffer
+    while (Serial.available())
+        Serial.read();
+    // Wait for user input
+    while (!Serial.available())
+        ;
+
+    Serial.println("Calibrating IMU...");
     
     // The IMU on the OTOS includes a gyroscope and accelerometer, which could
     // have an offset. Note that as of firmware version 1.0, the calibration
@@ -59,27 +70,29 @@ void setup()
     myOtos.setLinearScalar(1.0);
     myOtos.setAngularScalar(1.0);
 
-    // Reset the tracking algorithm, making the sensor report it's at the origin
+    // Reset the tracking algorithm - this resets the position to the origin,
+    // but can also be used to recover from some rare tracking errors
     myOtos.resetTracking();
 }
 
 void loop()
 {
-    // Get the latest sensor pose, which includes the x and y coordinates, plus
-    // the heading angle
-    otos_pose2d_t otosPose;
-    myOtos.getPosition(otosPose);
+    // Get the latest position, which includes the x and y coordinates, plus the
+    // heading angle
+    sfe_otos_pose2d_t myPosition;
+    myOtos.getPosition(myPosition);
 
     // Print measurement
     Serial.println();
-    Serial.println("Sensor pose:");
+    Serial.println("Position:");
     Serial.print("X (Inches): ");
-    Serial.println(otosPose.x);
+    Serial.println(myPosition.x);
     Serial.print("Y (Inches): ");
-    Serial.println(otosPose.y);
+    Serial.println(myPosition.y);
     Serial.print("Heading (Degrees): ");
-    Serial.println(otosPose.h);
+    Serial.println(myPosition.h);
 
     // Wait a bit so we don't spam the serial port
     delay(500);
+
 }

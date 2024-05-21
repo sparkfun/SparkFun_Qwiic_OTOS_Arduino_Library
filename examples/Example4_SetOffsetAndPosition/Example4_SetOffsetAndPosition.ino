@@ -26,8 +26,23 @@ void setup()
     }
 
     Serial.println("OTOS connected!");
-    
-    // Here you can set the offset for the sensor relative to the center of the
+
+    Serial.println("Ensure the OTOS is flat and stationary, then enter any key to calibrate the IMU");
+
+    // Clear the serial buffer
+    while (Serial.available())
+        Serial.read();
+    // Wait for user input
+    while (!Serial.available())
+        ;
+
+    Serial.println("Calibrating IMU...");
+
+    // Calibrate the IMU, which removes the accelerometer and gyroscope offsets
+    myOtos.calibrateImu();
+
+    // Assuming you've mounted your sensor to a robot and it's not centered,
+    // you can specify the offset for the sensor relative to the center of the
     // robot. The units default to inches and degrees, but if you want to use
     // different units, specify them before setting the offset! Note that as of
     // firmware version 1.0, these values will be lost after a power cycle, so
@@ -37,37 +52,39 @@ void setup()
     // clockwise (negative rotation) from the robot's orientation, the offset
     // would be {-5, 10, -90}. These can be any value, even the angle can be
     // tweaked slightly to compensate for imperfect mounting (eg. 1.3 degrees).
-    otos_pose2d_t offset = {-5, 10, -90};
+    sfe_otos_pose2d_t offset = {-5, 10, -90};
     myOtos.setOffset(offset);
 
-    // Reset the tracking algorithm, making the sensor report it's at the origin
+    // Reset the tracking algorithm - this resets the position to the origin,
+    // but can also be used to recover from some rare tracking errors
     myOtos.resetTracking();
 
     // After resetting the tracking, the OTOS will report that the robot is at
-    // the origin. If you know the starting coordinates of the robot, or have
+    // the origin. If your robot does not start at the origin, or you have
     // another source of location information (eg. vision odometry), you can set
     // the OTOS location to match and it will continue to track from there.
-    otos_pose2d_t currentPosition = {0, 0, 0};
+    sfe_otos_pose2d_t currentPosition = {0, 0, 0};
     myOtos.setPosition(currentPosition);
 }
 
 void loop()
 {
-    // Get the latest robot pose, which includes the x and y coordinates, plus
-    // the heading angle
-    otos_pose2d_t robotPose;
-    myOtos.getPosition(robotPose);
+    // Get the latest position, which includes the x and y coordinates, plus the
+    // heading angle
+    sfe_otos_pose2d_t myPosition;
+    myOtos.getPosition(myPosition);
 
     // Print measurement
     Serial.println();
-    Serial.println("Robot pose:");
+    Serial.println("Position:");
     Serial.print("X (Inches): ");
-    Serial.println(robotPose.x);
+    Serial.println(myPosition.x);
     Serial.print("Y (Inches): ");
-    Serial.println(robotPose.y);
+    Serial.println(myPosition.y);
     Serial.print("Heading (Degrees): ");
-    Serial.println(robotPose.h);
+    Serial.println(myPosition.h);
 
     // Wait a bit so we don't spam the serial port
     delay(500);
+
 }

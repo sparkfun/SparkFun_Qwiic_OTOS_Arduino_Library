@@ -27,36 +27,51 @@ void setup()
 
     Serial.println("OTOS connected!");
 
-    // Reset the tracking algorithm, making the sensor report it's at the origin
+    Serial.println("Ensure the OTOS is flat and stationary, then enter any key to calibrate the IMU");
+
+    // Clear the serial buffer
+    while (Serial.available())
+        Serial.read();
+    // Wait for user input
+    while (!Serial.available())
+        ;
+
+    Serial.println("Calibrating IMU...");
+
+    // Calibrate the IMU, which removes the accelerometer and gyroscope offsets
+    myOtos.calibrateImu();
+
+    // Reset the tracking algorithm - this resets the position to the origin,
+    // but can also be used to recover from some rare tracking errors
     myOtos.resetTracking();
 }
 
 void loop()
 {
-    // Get the latest sensor pose, which includes the x and y coordinates, plus
-    // the heading angle
-    otos_pose2d_t otosPose;
-    myOtos.getPosition(otosPose);
+    // Get the latest position, which includes the x and y coordinates, plus the
+    // heading angle
+    sfe_otos_pose2d_t myPosition;
+    myOtos.getPosition(myPosition);
 
     // Print measurement
     Serial.println();
-    Serial.println("Sensor pose:");
+    Serial.println("Position:");
     Serial.print("X (Inches): ");
-    Serial.println(otosPose.x);
+    Serial.println(myPosition.x);
     Serial.print("Y (Inches): ");
-    Serial.println(otosPose.y);
+    Serial.println(myPosition.y);
     Serial.print("Heading (Degrees): ");
-    Serial.println(otosPose.h);
+    Serial.println(myPosition.h);
 
     // Wait a bit so we don't spam the serial port
     delay(500);
 
     // Alternatively, you can comment out the print and delay code above, and
     // instead use the following code to rapidly refresh the data
-    // Serial.print(otosPose.x);
+    // Serial.print(myPosition.x);
     // Serial.print("\t");
-    // Serial.print(otosPose.y);
+    // Serial.print(myPosition.y);
     // Serial.print("\t");
-    // Serial.println(otosPose.h);
+    // Serial.println(myPosition.h);
     // delay(10);
 }

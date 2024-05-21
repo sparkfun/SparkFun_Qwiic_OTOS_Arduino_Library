@@ -28,8 +28,8 @@ void setup()
     Serial.println("OTOS connected!");
 
     // Get the hardware and firmware version
-    otos_version_t hwVersion;
-    otos_version_t fwVersion;
+    sfe_otos_version_t hwVersion;
+    sfe_otos_version_t fwVersion;
     myOtos.getVersionInfo(hwVersion, fwVersion);
 
     // Print the hardware and firmware version
