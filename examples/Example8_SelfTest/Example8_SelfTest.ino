@@ -4,6 +4,17 @@
     Copyright (c) 2024 SparkFun Electronics
 */
 
+/*******************************************************************************
+    Example 8 - Self Test
+
+    This example demonstrates how to perform a self test of the SparkFun Qwiic
+    Optical Tracking Odometry Sensor (OTOS).
+
+    The self test triggers the OTOS to perform a series of tests to ensure the
+    sensor is functioning correctly. This is performed during QC testing, but
+    you can also perform this test yourself.
+*******************************************************************************/
+
 #include "SparkFun_Qwiic_OTOS_Arduino_Library.h"
 #include "Wire.h"
 

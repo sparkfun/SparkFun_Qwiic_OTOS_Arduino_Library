@@ -4,6 +4,24 @@
     Copyright (c) 2024 SparkFun Electronics
 */
 
+/*******************************************************************************
+    Example 6 - Standard Deviation
+
+    This example demonstrates how to read the standard deviation of the
+    measurements of the SparkFun Qwiic Optical Tracking Odometry Sensor (OTOS).
+
+    The OTOS uses Kalman filters to estimate the position, velocity, and
+    acceleration of the x, y, and heading. The square root of the diagonal
+    elements of the covariance matrices are provided for the standard deviation
+    of each measurement. THEY DO NOT REPRESENT THE ACTUAL TRACKING ERROR! These
+    are statistical quantities that assume a correct model of the system, but
+    there could be unmodelled error sources that cause the physical error to
+    become larger than these statistical error (eg. improper calibration, or
+    tilting the OTOS to not be flat against the tracking surface). These are
+    provided primarily for anyone wanting to perform sensor fusion with
+    additional sensors.
+*******************************************************************************/
+
 #include "SparkFun_Qwiic_OTOS_Arduino_Library.h"
 #include "Wire.h"
 
@@ -69,22 +87,21 @@ void loop()
     // REPRESENT THE ACTUAL TRACKING ERROR! These are statistical quantities
     // that assume a correct model of the system, but there could be unmodelled
     // error sources that cause the physical error to become larger than these
-    // statistical error (eg. improper calibration, or rotating the OTOS to not
+    // statistical error (eg. improper calibration, or tilting the OTOS to not
     // be flat against the tracking surface). These are provided primarily for
-    // anyone wanting to perform sensor fusion with additional sensors, but they
-    // can be used to at least "get an idea" of the quality of the accuracy.
+    // anyone wanting to perform sensor fusion with additional sensors.
     myOtos.getPositionStdDev(posStdDev);
     // myOtos.getVelocityStdDev(velStdDev);
     // myOtos.getAccelerationStdDev(accStdDev);
 
-    // These values can instead be read out in chunks:
+    // These values can instead be burst read out in chunks:
     // myOtos.getPosVelAcc(pos, vel, acc);
     // myOtos.getPosVelAccStdDev(posStdDev, velStdDev, accStdDev);
     
-    // Or all at once:
+    // Or burst read them all at once:
     // myOtos.getPosVelAccAndStdDev(pos, vel, acc, posStdDev, velStdDev, accStdDev);
 
-    // Print measurements
+    // Print position and standard deviation
     Serial.println();
     Serial.println("Sensor pose:");
     Serial.print("X (Inches): ");
@@ -100,6 +117,7 @@ void loop()
     Serial.print(" +/- ");
     Serial.println(posStdDev.h);
 
+    // Print velocity and standard deviation
     // Serial.println();
     // Serial.println("Sensor velocity:");
     // Serial.print("X (Inches/sec): ");
@@ -115,6 +133,7 @@ void loop()
     // Serial.print(" +/- ");
     // Serial.println(velStdDev.h);
 
+    // Print acceleration and standard deviation
     // Serial.println();
     // Serial.println("Sensor acceleration:");
     // Serial.print("X (Inches/sec^2): ");

@@ -4,6 +4,14 @@
     Copyright (c) 2024 SparkFun Electronics
 */
 
+/*******************************************************************************
+    SparkFun_Qwiic_OTOS_Arduino_Library.h - Arduino wrapper of the C++ driver
+    for the SparkFun Qwiic Optical Tracking Odometry Sensor (OTOS).
+
+    This is a simple wrapper around the C++ driver to make it easier to use with
+    Arduino.
+*******************************************************************************/
+
 #pragma once
 
 #include "Arduino.h"

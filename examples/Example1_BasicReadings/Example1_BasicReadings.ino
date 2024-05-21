@@ -4,6 +4,18 @@
     Copyright (c) 2024 SparkFun Electronics
 */
 
+/*******************************************************************************
+    Example 1 - Basic Readings
+
+    This example demonstrates how to read the position and heading from the
+    SparkFun Qwiic Optical Tracking Odometry Sensor (OTOS).
+
+    This example should be used to verify that the OTOS is connected and
+    functioning correctly. It will just print the position and heading tracked
+    by the OTOS to the serial monitor. It is recommended that you check out the
+    other examples before using the OTOS in your own project.
+*******************************************************************************/
+
 #include "SparkFun_Qwiic_OTOS_Arduino_Library.h"
 #include "Wire.h"
 

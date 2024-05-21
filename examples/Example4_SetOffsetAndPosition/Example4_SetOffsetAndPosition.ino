@@ -4,6 +4,20 @@
     Copyright (c) 2024 SparkFun Electronics
 */
 
+/*******************************************************************************
+    Example 4 - Set Offset and Position
+
+    This example demonstrates how to set the offset and position of the SparkFun
+    Qwiic Optical Tracking Odometry Sensor (OTOS).
+
+    If your OTOS is mounted to a robot and is not centered, you can specify the
+    offset for the sensor relative to the center of the robot; rather than
+    returning the position of the sensor, the OTOS will calculate and return the
+    position of the robot's center. If you know where your robot is located,
+    such as the starting location or from another sensor, you can send that
+    position to the OTOS and it will continue to track from there.
+*******************************************************************************/
+
 #include "SparkFun_Qwiic_OTOS_Arduino_Library.h"
 #include "Wire.h"
 

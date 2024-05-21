@@ -4,6 +4,11 @@
     Copyright (c) 2024 SparkFun Electronics
 */
 
+/*******************************************************************************
+    sfeQwiicOtos.h - C++ driver implementation for the SparkFun Qwiic Optical
+    Tracking Odometry Sensor (OTOS).
+*******************************************************************************/
+
 #include "sfeQwiicOtos.h"
 
 sfeQwiicOtos::sfeQwiicOtos()

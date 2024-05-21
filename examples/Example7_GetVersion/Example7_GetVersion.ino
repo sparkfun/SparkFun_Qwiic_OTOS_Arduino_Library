@@ -4,6 +4,19 @@
     Copyright (c) 2024 SparkFun Electronics
 */
 
+/*******************************************************************************
+    Example 7 - Get Version
+
+    This example demonstrates how to get the hardware and firmware version
+    numbers from the SparkFun Qwiic Optical Tracking Odometry Sensor (OTOS).
+
+    There may be future hardware and/or firmware changes of the OTOS, so you can
+    use this example to check which version you have. See the product page or
+    hardware repository to see what the latest version is:
+    https://www.sparkfun.com/products/24904
+    https://github.com/sparkfun/SparkFun_Optical_Tracking_Odometry_Sensor
+*******************************************************************************/
+
 #include "SparkFun_Qwiic_OTOS_Arduino_Library.h"
 #include "Wire.h"
 

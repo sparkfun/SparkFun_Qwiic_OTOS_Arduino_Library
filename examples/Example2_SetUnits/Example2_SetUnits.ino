@@ -4,6 +4,16 @@
     Copyright (c) 2024 SparkFun Electronics
 */
 
+/*******************************************************************************
+    Example 2 - Set Units
+
+    This example demonstrates how to change the units of the SparkFun Qwiic
+    Optical Tracking Odometry Sensor (OTOS).
+
+    The OTOS library defaults to inches and degrees, but you can change the
+    units to suit the needs of your project.
+*******************************************************************************/
+
 #include "SparkFun_Qwiic_OTOS_Arduino_Library.h"
 #include "Wire.h"
 

@@ -4,6 +4,18 @@
     Copyright (c) 2024 SparkFun Electronics
 */
 
+/*******************************************************************************
+    Example 5 - Velocity and Acceleration
+
+    This example demonstrates how to read the velocity and acceleration from the
+    SparkFun Qwiic Optical Tracking Odometry Sensor (OTOS).
+
+    The primary purpose of the OTOS is to track position, but it also provides
+    velocity and acceleration measurements for more advanced applications. Note
+    that these measurements can be noisy and inaccurate, especially if the
+    sensor is not flat to the ground.
+*******************************************************************************/
+
 #include "SparkFun_Qwiic_OTOS_Arduino_Library.h"
 #include "Wire.h"
 
@@ -60,14 +72,38 @@ void loop()
     myOtos.getVelocity(vel);
     myOtos.getAcceleration(acc);
 
-    // Or all at once with the following:
+    // Or burst read them all at once with the following:
     // myOtos.getPosVelAcc(pos, vel, acc);
 
-    // Print measurements
-    Serial.printf("Pos: X: %.3f\tY: %.3f\tH: %.3f\n", pos.x, pos.y, pos.h);
-    Serial.printf("Vel: X: %.3f\tY: %.3f\tH: %.3f\n", vel.x, vel.y, vel.h);
-    Serial.printf("Acc: X: %.3f\tY: %.3f\tH: %.3f\n", acc.x, acc.y, acc.h);
+    // Print position
     Serial.println();
+    Serial.println("Position:");
+    Serial.print("X (Inches): ");
+    Serial.println(pos.x);
+    Serial.print("Y (Inches): ");
+    Serial.println(pos.y);
+    Serial.print("Heading (Degrees): ");
+    Serial.println(pos.h);
+    
+    // Print velocity
+    Serial.println();
+    Serial.println("Position:");
+    Serial.print("X (Inches): ");
+    Serial.println(vel.x);
+    Serial.print("Y (Inches): ");
+    Serial.println(vel.y);
+    Serial.print("Heading (Degrees): ");
+    Serial.println(vel.h);
+    
+    // Print acceleration
+    Serial.println();
+    Serial.println("Position:");
+    Serial.print("X (Inches): ");
+    Serial.println(acc.x);
+    Serial.print("Y (Inches): ");
+    Serial.println(acc.y);
+    Serial.print("Heading (Degrees): ");
+    Serial.println(acc.h);
 
     // Wait a bit so we don't spam the serial port
     delay(500);

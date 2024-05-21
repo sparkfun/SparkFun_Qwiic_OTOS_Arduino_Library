@@ -4,6 +4,21 @@
     Copyright (c) 2024 SparkFun Electronics
 */
 
+/*******************************************************************************
+    Example 3 - Calibration
+
+    This example demonstrates how to calibrate the SparkFun Qwiic Optical
+    Tracking Odometry Sensor (OTOS).
+
+    This example should be used to calibrate the linear and angular scalars of
+    the OTOS to get the most accurate tracking performance. The linear scalar
+    can be used to compensate for scaling issues with the x and y measurements,
+    while the angular scalar can be used to compensate for scaling issues with
+    the heading measurement. Note that if the heading measurement is off, that
+    can also cause the x and y measurements to be off, so it's recommended to
+    calibrate the angular scalar first.
+*******************************************************************************/
+
 #include "SparkFun_Qwiic_OTOS_Arduino_Library.h"
 #include "Wire.h"
 
