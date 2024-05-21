@@ -7,17 +7,10 @@
 #include "sfeQwiicOtos.h"
 
 sfeQwiicOtos::sfeQwiicOtos()
+    : _commBus{nullptr}, _linearUnit{kOtosLinearUnitInches}, _angularUnit{kOtosAngularUnitDegrees},
+      _meterToUnit{kMeterToInch}, _radToUnit{kRadianToDegree}
 {
-    // Set communication bus to nullptr
-    _commBus = nullptr;
-
-    // Set default units to inches and degrees
-    _linearUnit = kOtosLinearUnitInches;
-    _angularUnit = kOtosAngularUnitDegrees;
-
-    // Set conversion factors to default units
-    _meterToUnit = kMeterToInch;
-    _radToUnit = kRadianToDegree;
+    // Nothing to do here!
 }
 
 sfeTkError_t sfeQwiicOtos::begin(sfeTkII2C *commBus)
@@ -27,7 +20,7 @@ sfeTkError_t sfeQwiicOtos::begin(sfeTkII2C *commBus)
         return kSTkErrFail;
 
     // Check the device address
-    if (commBus->address() < 0x08 || commBus->address() > 0x77)
+    if (commBus->address() != kOtosDefaultAddress)
         return kSTkErrFail;
 
     // Set bus pointer
@@ -45,7 +38,7 @@ sfeTkError_t sfeQwiicOtos::isConnected()
         return err;
     
     // Read the product ID
-    uint8_t prodId = 0;
+    uint8_t prodId;
     err = _commBus->readRegisterByte(kOtosRegProductId, prodId);
     if(err != kSTkErrOk)
         return err;
@@ -62,7 +55,7 @@ sfeTkError_t sfeQwiicOtos::getVersionInfo(otos_version_t &hwVersion, otos_versio
 {
     // Read hardware and firmware version registers
     uint8_t rawData[2];
-    size_t readBytes = 0;
+    size_t readBytes;
     sfeTkError_t err = _commBus->readRegisterRegion(kOtosRegHwVersion, rawData, 2, readBytes);
     if(err != kSTkErrOk)
         return err;
@@ -121,22 +114,29 @@ sfeTkError_t sfeQwiicOtos::calibrateImu(uint8_t numSamples, bool waitUntilDone)
     if(!waitUntilDone)
         return kSTkErrOk;
     
-    // Wait for the calibration to finish, which is indicated by the gyro
-    // calibration register reading zero
-    uint8_t calibrationValue = numSamples;
-    while(calibrationValue != 0)
+    // Wait for the calibration to finish, which is indicated by the IMU
+    // calibration register reading zero, or until we reach the maximum number
+    // of read attempts
+    for(uint8_t numAttempts = numSamples; numAttempts > 0; numAttempts--)
     {
-        // Give a short delay between reads
-        delayMs(2);
+        // Give a short delay between reads. As of firmware v1.0, samples take
+        // 2.4ms each, so 3ms should guarantee the next sample is done. This
+        // also ensures the max attempts is not exceeded in normal operation
+        delayMs(3);
 
         // Read the gryo calibration register value
+        uint8_t calibrationValue;
         err = _commBus->readRegisterByte(kOtosRegImuCalib, calibrationValue);
         if(err != kSTkErrOk)
             return err;
+        
+        // Check if calibration is done
+        if(calibrationValue == 0)
+            return kSTkErrOk;
     }
 
-    // Done!
-    return kSTkErrOk;
+    // Max number of attempts reached, calibration failed
+    return kSTkErrFail;
 }
 
 otos_linear_unit_t sfeQwiicOtos::getLinearUnit()
@@ -178,8 +178,8 @@ void sfeQwiicOtos::setAngularUnit(otos_angular_unit_t unit)
 sfeTkError_t sfeQwiicOtos::getLinearScalar(float &scalar)
 {
     // Read the linear scalar from the device
-    uint8_t rawScalar = 0;
-    sfeTkError_t err = _commBus->readRegisterByte(kOtosRegScalarXY, rawScalar);
+    uint8_t rawScalar;
+    sfeTkError_t err = _commBus->readRegisterByte(kOtosRegScalarLinear, rawScalar);
     if(err != kSTkErrOk)
         return kSTkErrFail;
 
@@ -192,22 +192,22 @@ sfeTkError_t sfeQwiicOtos::getLinearScalar(float &scalar)
 
 sfeTkError_t sfeQwiicOtos::setLinearScalar(float scalar)
 {
-    // Check if the scalar is out of bounds, can only be 0.872 to 1.127
-    if(scalar < 0.872f || scalar > 1.127f)
+    // Check if the scalar is out of bounds
+    if(scalar < kSfeOtosMinScalar || scalar > kSfeOtosMaxScalar)
         return kSTkErrFail;
     
-    // Convert to raw integer, multiples of 0.1%
-    uint8_t rawScalar = (int8_t)((scalar - 1.0f) * 1000);
+    // Convert to integer, multiples of 0.1% (+0.5 to round instead of truncate)
+    uint8_t rawScalar = (int8_t)((scalar - 1.0f) * 1000 + 0.5f);
 
     // Write the scalar to the device
-    return _commBus->writeRegisterByte(kOtosRegScalarXY, rawScalar);
+    return _commBus->writeRegisterByte(kOtosRegScalarLinear, rawScalar);
 }
 
 sfeTkError_t sfeQwiicOtos::getAngularScalar(float &scalar)
 {
     // Read the angular scalar from the device
-    uint8_t rawScalar = 0;
-    sfeTkError_t err = _commBus->readRegisterByte(kOtosRegScalarH, rawScalar);
+    uint8_t rawScalar;
+    sfeTkError_t err = _commBus->readRegisterByte(kOtosRegScalarAngular, rawScalar);
     if(err != kSTkErrOk)
         return kSTkErrFail;
 
@@ -220,15 +220,15 @@ sfeTkError_t sfeQwiicOtos::getAngularScalar(float &scalar)
 
 sfeTkError_t sfeQwiicOtos::setAngularScalar(float scalar)
 {
-    // Check if the scalar is out of bounds, can only be 0.872 to 1.127
-    if(scalar < 0.872f || scalar > 1.127f)
+    // Check if the scalar is out of bounds
+    if(scalar < kSfeOtosMinScalar || scalar > kSfeOtosMaxScalar)
         return kSTkErrFail;
     
-    // Convert to raw integer, multiples of 0.1%
-    uint8_t rawScalar = (int8_t)((scalar - 1.0f) * 1000);
+    // Convert to integer, multiples of 0.1% (+0.5 to round instead of truncate)
+    uint8_t rawScalar = (int8_t)((scalar - 1.0f) * 1000 + 0.5f);
 
     // Write the scalar to the device
-    return _commBus->writeRegisterByte(kOtosRegScalarH, rawScalar);
+    return _commBus->writeRegisterByte(kOtosRegScalarAngular, rawScalar);
 }
 
 sfeTkError_t sfeQwiicOtos::resetTracking()
@@ -276,12 +276,12 @@ sfeTkError_t sfeQwiicOtos::setPosition(otos_pose2d_t &pose)
 
 sfeTkError_t sfeQwiicOtos::getVelocity(otos_pose2d_t &pose)
 {
-    return readPoseRegs(kOtosRegVelXL, pose, kInt16ToMeter, kInt16ToRps);
+    return readPoseRegs(kOtosRegVelXL, pose, kInt16ToMps, kInt16ToRps);
 }
 
 sfeTkError_t sfeQwiicOtos::getAcceleration(otos_pose2d_t &pose)
 {
-    return readPoseRegs(kOtosRegAccXL, pose, kInt16ToMeter, kInt16ToRpss);
+    return readPoseRegs(kOtosRegAccXL, pose, kInt16ToMpss, kInt16ToRpss);
 }
 
 sfeTkError_t sfeQwiicOtos::getPositionStdDev(otos_pose2d_t &pose)
@@ -291,19 +291,19 @@ sfeTkError_t sfeQwiicOtos::getPositionStdDev(otos_pose2d_t &pose)
 
 sfeTkError_t sfeQwiicOtos::getVelocityStdDev(otos_pose2d_t &pose)
 {
-    return readPoseRegs(kOtosRegVelStdXL, pose, kInt16ToMeter, kInt16ToRps);
+    return readPoseRegs(kOtosRegVelStdXL, pose, kInt16ToMps, kInt16ToRps);
 }
 
 sfeTkError_t sfeQwiicOtos::getAccelerationStdDev(otos_pose2d_t &pose)
 {
-    return readPoseRegs(kOtosRegAccStdXL, pose, kInt16ToMeter, kInt16ToRpss);
+    return readPoseRegs(kOtosRegAccStdXL, pose, kInt16ToMpss, kInt16ToRpss);
 }
 
 sfeTkError_t sfeQwiicOtos::getPosVelAcc(otos_pose2d_t &pos, otos_pose2d_t &vel, otos_pose2d_t &acc)
 {
     // Read all pose registers
     uint8_t rawData[18];
-    size_t bytesRead = 0;
+    size_t bytesRead;
     sfeTkError_t err = _commBus->readRegisterRegion(kOtosRegPosXL, rawData, 18, bytesRead);
     if(err != kSTkErrOk)
         return err;
@@ -314,8 +314,8 @@ sfeTkError_t sfeQwiicOtos::getPosVelAcc(otos_pose2d_t &pos, otos_pose2d_t &vel, 
 
     // Convert raw data to pose units
     regsToPose(rawData, pos, kInt16ToMeter, kInt16ToRad);
-    regsToPose(rawData + 6, vel, kInt16ToMeter, kInt16ToRps);
-    regsToPose(rawData + 12, acc, kInt16ToMeter, kInt16ToRpss);
+    regsToPose(rawData + 6, vel, kInt16ToMps, kInt16ToRps);
+    regsToPose(rawData + 12, acc, kInt16ToMpss, kInt16ToRpss);
 
     // Done!
     return kSTkErrOk;
@@ -325,7 +325,7 @@ sfeTkError_t sfeQwiicOtos::getPosVelAccStdDev(otos_pose2d_t &pos, otos_pose2d_t 
 {
     // Read all pose registers
     uint8_t rawData[18];
-    size_t bytesRead = 0;
+    size_t bytesRead;
     sfeTkError_t err = _commBus->readRegisterRegion(kOtosRegPosStdXL, rawData, 18, bytesRead);
     if(err != kSTkErrOk)
         return err;
@@ -336,8 +336,8 @@ sfeTkError_t sfeQwiicOtos::getPosVelAccStdDev(otos_pose2d_t &pos, otos_pose2d_t 
 
     // Convert raw data to pose units
     regsToPose(rawData, pos, kInt16ToMeter, kInt16ToRad);
-    regsToPose(rawData + 6, vel, kInt16ToMeter, kInt16ToRps);
-    regsToPose(rawData + 12, acc, kInt16ToMeter, kInt16ToRpss);
+    regsToPose(rawData + 6, vel, kInt16ToMps, kInt16ToRps);
+    regsToPose(rawData + 12, acc, kInt16ToMpss, kInt16ToRpss);
 
     // Done!
     return kSTkErrOk;
@@ -347,7 +347,7 @@ sfeTkError_t sfeQwiicOtos::getPosVelAccAndStdDev(otos_pose2d_t &pos, otos_pose2d
 {
     // Read all pose registers
     uint8_t rawData[36];
-    size_t bytesRead = 0;
+    size_t bytesRead;
     sfeTkError_t err = _commBus->readRegisterRegion(kOtosRegPosXL, rawData, 36, bytesRead);
     if(err != kSTkErrOk)
         return err;
@@ -358,11 +358,11 @@ sfeTkError_t sfeQwiicOtos::getPosVelAccAndStdDev(otos_pose2d_t &pos, otos_pose2d
 
     // Convert raw data to pose units
     regsToPose(rawData, pos, kInt16ToMeter, kInt16ToRad);
-    regsToPose(rawData + 6, vel, kInt16ToMeter, kInt16ToRps);
-    regsToPose(rawData + 12, acc, kInt16ToMeter, kInt16ToRpss);
+    regsToPose(rawData + 6, vel, kInt16ToMps, kInt16ToRps);
+    regsToPose(rawData + 12, acc, kInt16ToMpss, kInt16ToRpss);
     regsToPose(rawData + 18, posStdDev, kInt16ToMeter, kInt16ToRad);
-    regsToPose(rawData + 24, velStdDev, kInt16ToMeter, kInt16ToRps);
-    regsToPose(rawData + 30, accStdDev, kInt16ToMeter, kInt16ToRpss);
+    regsToPose(rawData + 24, velStdDev, kInt16ToMps, kInt16ToRps);
+    regsToPose(rawData + 30, accStdDev, kInt16ToMpss, kInt16ToRpss);
 
     // Done!
     return kSTkErrOk;
@@ -370,7 +370,7 @@ sfeTkError_t sfeQwiicOtos::getPosVelAccAndStdDev(otos_pose2d_t &pos, otos_pose2d
 
 sfeTkError_t sfeQwiicOtos::readPoseRegs(uint8_t reg, otos_pose2d_t &pose, float rawToXY, float rawToH)
 {
-    size_t bytesRead = 0;
+    size_t bytesRead;
     uint8_t rawData[6];
 
     // Attempt to read the raw pose data

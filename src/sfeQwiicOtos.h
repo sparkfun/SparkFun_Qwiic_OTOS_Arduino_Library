@@ -17,8 +17,8 @@ const uint8_t kOtosDefaultAddress = 0x17;
 const uint8_t kOtosRegProductId = 0x00;
 const uint8_t kOtosRegHwVersion = 0x01;
 const uint8_t kOtosRegFwVersion = 0x02;
-const uint8_t kOtosRegScalarXY = 0x04;
-const uint8_t kOtosRegScalarH = 0x05;
+const uint8_t kOtosRegScalarLinear = 0x04;
+const uint8_t kOtosRegScalarAngular = 0x05;
 const uint8_t kOtosRegImuCalib = 0x06;
 const uint8_t kOtosRegReset = 0x07;
 
@@ -81,28 +81,46 @@ const float kInchToMeter = 1.0f / kMeterToInch;
 const float kRadianToDegree = 180.0f / M_PI;
 const float kDegreeToRadian = M_PI / 180.0f;
 
-// Conversion factor for X and Y position/velocity/acceleration registers.
-// 16-bit signed registers with a max value of 16 gives a resolution of about
-// 0.00049 meters (0.019 inches)
-const float kMeterToInt16 = 32768.0f / 16.0f;
+// Conversion factor for the linear position registers. 16-bit signed registers
+// with a max value of 10 meters (394 inches) gives a resolution of about 0.0003
+// mps (0.012 ips)
+const float kMeterToInt16 = 32768.0f / 10.0f;
 const float kInt16ToMeter = 1.0f / kMeterToInt16;
 
-// Converstion factor for the heading register. 16-bit signed register with a
-// max value of pi gives a resolution of about 0.00096 radians (0.0055 degrees)
+// Conversion factor for the linear velocity registers. 16-bit signed registers
+// with a max value of 5 mps (197 ips) gives a resolution of about 0.00015 mps
+// (0.006 ips)
+const float kMpsToInt16 = 32768.0f / 5.0f;
+const float kInt16ToMps = 1.0f / kMpsToInt16;
+
+// Conversion factor for the linear acceleration registers. 16-bit signed
+// registers with a max value of 157 mps^2 (16 g) gives a resolution of
+// about 0.0048 mps^2 (0.49 mg)
+const float kMpssToInt16 = 32768.0f / (16.0f * 9.80665f);
+const float kInt16ToMpss = 1.0f / kMpssToInt16;
+
+// Conversion factor for the angular position registers. 16-bit signed registers
+// with a max value of pi radians (180 degrees) gives a resolution of about
+// 0.00096 radians (0.0055 degrees)
 const float kRadToInt16 = 32768.0f / M_PI;
 const float kInt16ToRad = 1.0f / kRadToInt16;
 
-// Converstion factor for the heading velocity register. 16-bit signed register
+// Conversion factor for the angular velocity registers. 16-bit signed registers
 // with a max value of 34.9 rps (2000 dps) gives a resolution of about 0.0011
 // rps (0.061 degrees per second)
 const float kRpsToInt16 = 32768.0f / (2000.0f * kDegreeToRadian);
 const float kInt16ToRps = 1.0f / kRpsToInt16;
 
-// Converstion factor for the heading acceleration register. 16-bit signed
-// register with a max value of 3141 rps^2 (180000 dps^2) gives a resolution of
+// Conversion factor for the angular acceleration registers. 16-bit signed
+// registers with a max value of 3141 rps^2 (180000 dps^2) gives a resolution of
 // about 0.096 rps^2 (5.5 dps^2)
 const float kRpssToInt16 = 32768.0f / (M_PI * 1000.0f);
 const float kInt16ToRpss = 1.0f / kRpssToInt16;
+
+// Min and max scalar values for the linear and angular scalars (8-bit signed
+// integer representing 0.1% increments)
+const float kSfeOtosMinScalar = 0.872f;
+const float kSfeOtosMaxScalar = 1.127f;
 
 // Struct to define a 2D pose, including x and y coordinates and an angle h
 struct otos_pose2d_t
@@ -141,7 +159,8 @@ typedef union {
         uint8_t enLut : 1;
         uint8_t enAcc : 1;
         uint8_t enRot : 1;
-        uint8_t reserved : 5;
+        uint8_t enVar : 1;
+        uint8_t reserved : 4;
     };
     uint8_t value;
 } sfe_otos_config_signal_process_t;

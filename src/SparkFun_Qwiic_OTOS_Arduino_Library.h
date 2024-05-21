@@ -17,10 +17,10 @@ class QwiicOTOS : public sfeQwiicOtos
     /// @param address I2C device address to use for the sensor
     /// @param wirePort Wire port to use for I2C communication
     /// @return True if successful, false otherwise
-    bool begin(uint8_t address = kOtosDefaultAddress, TwoWire &wirePort = Wire)
+    bool begin(TwoWire &wirePort = Wire)
     {
         // Setup Arduino I2C bus
-        _theI2CBus.init(wirePort, address);
+        _theI2CBus.init(wirePort, kOtosDefaultAddress);
 
         // Begin the sensor
         return sfeQwiicOtos::begin(&_theI2CBus) == kSTkErrOk;
