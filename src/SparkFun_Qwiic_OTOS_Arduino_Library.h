@@ -18,11 +18,12 @@
 #include "sfeQwiicOtos.h"
 #include <Wire.h>
 
+/// @brief Arduino class for the SparkFun Qwiic Optical Tracking Odometry Sensor
+/// (OTOS)
 class QwiicOTOS : public sfeQwiicOtos
 {
   public:
-    /// @brief Begins the Qwiic Ultrasonic sensor
-    /// @param address I2C device address to use for the sensor
+    /// @brief Begins the Qwiic OTOS and verifies it is connected
     /// @param wirePort Wire port to use for I2C communication
     /// @return True if successful, false otherwise
     bool begin(TwoWire &wirePort = Wire)
