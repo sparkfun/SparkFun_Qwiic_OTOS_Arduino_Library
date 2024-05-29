@@ -1,11 +1,12 @@
-# SparkFun Qwiic OTOS Arduino Library
+# SparkFun Optical Tracking Odometry Sensor Arduino Library
 ========================================
 
-<table class="table table-hover table-striped table-bordered">
-    <p> TODO: Add product photos and links </p>
-</table>
 
-This thing is awesome. Get it. Get it now!
+[![SparkFun Optical Tracking Odometry Sensor](https://cdn.sparkfun.com/assets/parts/2/5/2/0/9/SEN-24904-Optical-Tracking-Odometry-Sensor-Feature.jpg)](https://www.sparkfun.com/products/24904)
+
+[*SparkFun Optical Tracking Odometry Sensor [SEN-24904]*](https://www.sparkfun.com/products/24904)
+
+Arduino Library for the SparkFun Optical Tracking Odometry Sensor
 
 Repository Contents
 -------------------
@@ -16,8 +17,9 @@ Repository Contents
 
 Documentation
 --------------
-* **[GitHub Repo](https://github.com/sparkfun/SparkFun_Optical_Tracking_Odometry_Sensor)** - Hardware Library for the SparkFyn Optical Tracking Odometry Sensor
-* **[Hookup Guide](https://docs.sparkfun.com/SparkFun_Optical_Tracking_Odometry_Sensor)** - Hookup Guide for the SparkFyn Optical Tracking Odometry Sensor
+* **[GitHub Repo](https://github.com/sparkfun/SparkFun_Optical_Tracking_Odometry_Sensor)** - Hardware repository for the SparkFun Optical Tracking Odometry Sensor
+* **[Hookup Guide](https://docs.sparkfun.com/SparkFun_Optical_Tracking_Odometry_Sensor)** - Hookup Guide for the SparkFun Optical Tracking Odometry Sensor
+
 License Information
 -------------------
 
