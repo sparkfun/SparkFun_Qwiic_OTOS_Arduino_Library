@@ -87,22 +87,22 @@ void loop()
     
     // Print velocity
     Serial.println();
-    Serial.println("Position:");
-    Serial.print("X (Inches): ");
+    Serial.println("Velocity:");
+    Serial.print("X (Inches/sec): ");
     Serial.println(vel.x);
-    Serial.print("Y (Inches): ");
+    Serial.print("Y (Inches/sec): ");
     Serial.println(vel.y);
-    Serial.print("Heading (Degrees): ");
+    Serial.print("Heading (Degrees/sec): ");
     Serial.println(vel.h);
     
     // Print acceleration
     Serial.println();
-    Serial.println("Position:");
-    Serial.print("X (Inches): ");
+    Serial.println("Acceleration:");
+    Serial.print("X (Inches/sec^2): ");
     Serial.println(acc.x);
-    Serial.print("Y (Inches): ");
+    Serial.print("Y (Inches/sec^2): ");
     Serial.println(acc.y);
-    Serial.print("Heading (Degrees): ");
+    Serial.print("Heading (Degrees/sec^2): ");
     Serial.println(acc.h);
 
     // Wait a bit so we don't spam the serial port

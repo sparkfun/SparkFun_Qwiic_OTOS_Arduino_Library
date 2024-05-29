@@ -103,7 +103,7 @@ void loop()
 
     // Print position and standard deviation
     Serial.println();
-    Serial.println("Sensor pose:");
+    Serial.println("Position:");
     Serial.print("X (Inches): ");
     Serial.print(pos.x);
     Serial.print(" +/- ");
@@ -119,7 +119,7 @@ void loop()
 
     // Print velocity and standard deviation
     // Serial.println();
-    // Serial.println("Sensor velocity:");
+    // Serial.println("Velocity:");
     // Serial.print("X (Inches/sec): ");
     // Serial.print(vel.x);
     // Serial.print(" +/- ");
@@ -135,7 +135,7 @@ void loop()
 
     // Print acceleration and standard deviation
     // Serial.println();
-    // Serial.println("Sensor acceleration:");
+    // Serial.println("Acceleration:");
     // Serial.print("X (Inches/sec^2): ");
     // Serial.print(acc.x);
     // Serial.print(" +/- ");
