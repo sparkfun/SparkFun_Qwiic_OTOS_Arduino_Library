@@ -1,4 +1,4 @@
-# SparkFun Optical Tracking Odometry Sensor Arduino Library
+SparkFun Optical Tracking Odometry Sensor Arduino Library
 ========================================
 
 
