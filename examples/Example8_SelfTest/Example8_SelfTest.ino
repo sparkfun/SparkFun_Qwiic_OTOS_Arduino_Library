@@ -1,6 +1,6 @@
 /*
     SPDX-License-Identifier: MIT
-    
+
     Copyright (c) 2024 SparkFun Electronics
 */
 
@@ -41,10 +41,10 @@ void setup()
     Serial.println("The OTOS must be stationary during the self test!");
 
     // Perform the self test
-    sfeTkError_t result = myOtos.selfTest();
-    
+    sfTkError_t result = myOtos.selfTest();
+
     // Check if the self test passed
-    if(result == kSTkErrOk)
+    if (result == ksfTkErrOk)
     {
         Serial.println("Self test passed!");
     }
