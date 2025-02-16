@@ -1,29 +1,41 @@
-/*
-    SPDX-License-Identifier: MIT
-    
-    Copyright (c) 2024 SparkFun Electronics
-*/
-
-/*******************************************************************************
-    sfeQwiicOtos.h - C++ driver for the SparkFun Qwiic Optical Tracking Odometry
-    Sensor (OTOS).
-
-    This file implements the driver as a C++ class. The driver uses the SparkFun
-    Toolkit library for I2C communication, which enables this driver to be
-    platform agnostic:
-    https://github.com/sparkfun/SparkFun_Toolkit
-*******************************************************************************/
-
+/**
+ * @file sfDevOTOS.h
+ * @brief Driver for the SparkFun Qwiic Optical Tracking Odometry Sensor (OTOS)
+ * @details This file implements a C++ driver class for interfacing with the OTOS sensor.
+ *          The driver uses the SparkFun Toolkit library for I2C communication,
+ *          making it platform agnostic.
+ *
+ * Features:
+ * - 2D pose tracking (position, velocity, acceleration)
+ * - Configurable linear and angular units
+ * - Built-in calibration and self-test functions
+ * - Adjustable signal processing parameters
+ * - Support for sensor offset compensation
+ * - Standard deviation measurements for tracking accuracy
+ *
+ * @author SparkFun Electronics
+ * @date February 2024
+ * @copyright Copyright (c) 2024-2025, SparkFun Electronics Inc. This project is released under the MIT License.
+ *
+ *  SPDX-License-Identifier: MIT
+ *
+ * @see https://github.com/sparkfun/SparkFun_Toolkit
+ */
 #pragma once
 
-#include "SparkFun_Toolkit.h"
 #include <math.h>
 #include <stdint.h>
+
+// include the sparkfun toolkit headers
+#include <sfTk/sfToolkit.h>
+
+// Bus interfaces
+#include <sfTk/sfTkII2C.h>
 
 /// @struct sfe_otos_pose2d_t
 /// @brief 2D pose structure, including x and y coordinates and heading angle
 /// @note Although pose is traditionally used for position and orientation, this
-/// structure is also used for velocity and accleration by the OTOS driver
+/// structure is also used for velocity and acceleration by the OTOS driver
 typedef struct
 {
     /// @brief X value
@@ -109,20 +121,20 @@ typedef union {
     {
         /// @brief Write 1 to start the self test
         uint8_t start : 1;
-        
+
         /// @brief Returns 1 while the self test is in progress
         uint8_t inProgress : 1;
-        
+
         /// @brief Returns 1 if the self test passed
         uint8_t pass : 1;
-        
+
         /// @brief Returns 1 if the self test failed
         uint8_t fail : 1;
-        
+
         /// @brief Reserved bits, do not use
         uint8_t reserved : 4;
     };
-    
+
     /// @brief Raw register value
     uint8_t value;
 } sfe_otos_self_test_config_t;
@@ -158,30 +170,30 @@ typedef union {
 /// Includes methods to communicate with the sensor, such as getting the tracked
 /// location, configuring the sensor, etc. This class is a base class that must
 /// be derived to implement the delay function and I2C communication bus.
-class sfeQwiicOtos
+class sfDevOTOS
 {
   public:
     /// @brief Default constructor, only initializes member variables
-    sfeQwiicOtos();
+    sfDevOTOS();
 
     /// @brief Begins the Qwiic OTOS and verifies it is connected
     /// @param commBus I2C bus to use for communication
     /// @return 0 for succuss, negative for errors, positive for warnings
-    sfeTkError_t begin(sfeTkII2C *commBus = nullptr);
+    sfTkError_t begin(sfTkII2C *commBus = nullptr);
 
     /// @brief Checks if the device is connected
     /// @return 0 for succuss, negative for errors, positive for warnings
-    sfeTkError_t isConnected();
+    sfTkError_t isConnected();
 
     /// @brief Gets the hardware and firmware version numbers from the OTOS
     /// @param hwVersion Hardware version number
     /// @param fwVersion Firmware version number
     /// @return 0 for succuss, negative for errors, positive for warnings
-    sfeTkError_t getVersionInfo(sfe_otos_version_t &hwVersion, sfe_otos_version_t &fwVersion);
+    sfTkError_t getVersionInfo(sfe_otos_version_t &hwVersion, sfe_otos_version_t &fwVersion);
 
     /// @brief Performs a self test of the OTOS
     /// @return 0 for succuss, negative for errors, positive for warnings
-    sfeTkError_t selfTest();
+    sfTkError_t selfTest();
 
     /// @brief Calibrates the IMU on the OTOS, which removes the accelerometer
     /// and gyroscope offsets
@@ -190,13 +202,13 @@ class sfeQwiicOtos
     /// @param waitUntilDone Whether to wait until the calibration is complete.
     /// Set false to calibrate asynchronously, see getImuCalibrationProgress()
     /// @return 0 for succuss, negative for errors, positive for warnings
-    sfeTkError_t calibrateImu(uint8_t numSamples = 255, bool waitUntilDone = true);
+    sfTkError_t calibrateImu(uint8_t numSamples = 255, bool waitUntilDone = true);
 
     /// @brief Gets the progress of the IMU calibration. Used for asynchronous
     /// calibration with calibrateImu()
     /// @param numSamples Number of samples remaining for calibration
     /// @return 0 for succuss, negative for errors, positive for warnings
-    sfeTkError_t getImuCalibrationProgress(uint8_t &numSamples);
+    sfTkError_t getImuCalibrationProgress(uint8_t &numSamples);
 
     /// @brief Gets the linear unit used by all methods using a pose
     /// @return Linear unit
@@ -217,63 +229,63 @@ class sfeQwiicOtos
     /// @brief Gets the linear scalar used by the OTOS
     /// @param scalar Linear scalar
     /// @return 0 for succuss, negative for errors, positive for warnings
-    sfeTkError_t getLinearScalar(float &scalar);
+    sfTkError_t getLinearScalar(float &scalar);
 
     /// @brief Sets the linear scalar used by the OTOS. Can be used to
     /// compensate for scaling issues with the sensor measurements
     /// @param scalar Linear scalar, must be between 0.872 and 1.127
     /// @return 0 for succuss, negative for errors, positive for warnings
-    sfeTkError_t setLinearScalar(float scalar);
+    sfTkError_t setLinearScalar(float scalar);
 
     /// @brief Gets the angular scalar used by the OTOS
     /// @param scalar Angular scalar
     /// @return 0 for succuss, negative for errors, positive for warnings
-    sfeTkError_t getAngularScalar(float &scalar);
+    sfTkError_t getAngularScalar(float &scalar);
 
     /// @brief Sets the angular scalar used by the OTOS. Can be used to
     /// compensate for scaling issues with the sensor measurements
     /// @param scalar Angular scalar, must be between 0.872 and 1.127
     /// @return 0 for succuss, negative for errors, positive for warnings
-    sfeTkError_t setAngularScalar(float scalar);
+    sfTkError_t setAngularScalar(float scalar);
 
     /// @brief Resets the tracking algorithm, which resets the position to the
     /// origin, but can also be used to recover from some rare tracking errors
     /// @return 0 for succuss, negative for errors, positive for warnings
-    sfeTkError_t resetTracking();
+    sfTkError_t resetTracking();
 
     /// @brief Gets the signal processing configuration from the OTOS
     /// @param config Signal processing configuration
     /// @return 0 for succuss, negative for errors, positive for warnings
-    sfeTkError_t getSignalProcessConfig(sfe_otos_signal_process_config_t &config);
+    sfTkError_t getSignalProcessConfig(sfe_otos_signal_process_config_t &config);
 
     /// @brief Sets the signal processing configuration on the OTOS. This is
     /// primarily useful for creating and testing a new lookup table calibration
     /// @param config Signal processing configuration
     /// @return 0 for succuss, negative for errors, positive for warnings
-    sfeTkError_t setSignalProcessConfig(sfe_otos_signal_process_config_t &config);
+    sfTkError_t setSignalProcessConfig(sfe_otos_signal_process_config_t &config);
 
     /// @brief Gets the status register from the OTOS, which includes warnings
     /// and errors reported by the sensor
     /// @param status Status register value
     /// @return 0 for succuss, negative for errors, positive for warnings
-    sfeTkError_t getStatus(sfe_otos_status_t &status);
+    sfTkError_t getStatus(sfe_otos_status_t &status);
 
     /// @brief Gets the offset of the OTOS
     /// @param pose Offset of the sensor relative to the center of the robot
     /// @return 0 for succuss, negative for errors, positive for warnings
-    sfeTkError_t getOffset(sfe_otos_pose2d_t &pose);
+    sfTkError_t getOffset(sfe_otos_pose2d_t &pose);
 
     /// @brief Sets the offset of the OTOS. This is useful if your sensor is
     /// mounted off-center from a robot. Rather than returning the position of
     /// the sensor, the OTOS will return the position of the robot
     /// @param pose Offset of the sensor relative to the center of the robot
     /// @return 0 for succuss, negative for errors, positive for warnings
-    sfeTkError_t setOffset(sfe_otos_pose2d_t &pose);
+    sfTkError_t setOffset(sfe_otos_pose2d_t &pose);
 
     /// @brief Gets the position measured by the OTOS
     /// @param pose Position measured by the OTOS
     /// @return 0 for succuss, negative for errors, positive for warnings
-    sfeTkError_t getPosition(sfe_otos_pose2d_t &pose);
+    sfTkError_t getPosition(sfe_otos_pose2d_t &pose);
 
     /// @brief Sets the position measured by the OTOS. This is useful if your
     /// robot does not start at the origin, or you have another source of
@@ -281,17 +293,17 @@ class sfeQwiicOtos
     /// tracking from this position
     /// @param pose New position for the OTOS to track from
     /// @return 0 for succuss, negative for errors, positive for warnings
-    sfeTkError_t setPosition(sfe_otos_pose2d_t &pose);
+    sfTkError_t setPosition(sfe_otos_pose2d_t &pose);
 
     /// @brief Gets the velocity measured by the OTOS
     /// @param pose Velocity measured by the OTOS
     /// @return 0 for succuss, negative for errors, positive for warnings
-    sfeTkError_t getVelocity(sfe_otos_pose2d_t &pose);
+    sfTkError_t getVelocity(sfe_otos_pose2d_t &pose);
 
     /// @brief Gets the acceleration measured by the OTOS
     /// @param pose Acceleration measured by the OTOS
     /// @return 0 for succuss, negative for errors, positive for warnings
-    sfeTkError_t getAcceleration(sfe_otos_pose2d_t &pose);
+    sfTkError_t getAcceleration(sfe_otos_pose2d_t &pose);
 
     /// @brief Gets the standard deviation of the measured position
     /// @param pose Standard deviation of the position measured by the OTOS
@@ -299,7 +311,7 @@ class sfeQwiicOtos
     /// @note These values are just the square root of the diagonal elements of
     /// the covariance matrices of the Kalman filters used in the firmware, so
     /// they are just statistical quantities and do not represent actual error!
-    sfeTkError_t getPositionStdDev(sfe_otos_pose2d_t &pose);
+    sfTkError_t getPositionStdDev(sfe_otos_pose2d_t &pose);
 
     /// @brief Gets the standard deviation of the measured velocity
     /// @param pose Standard deviation of the velocity measured by the OTOS
@@ -307,7 +319,7 @@ class sfeQwiicOtos
     /// @note These values are just the square root of the diagonal elements of
     /// the covariance matrices of the Kalman filters used in the firmware, so
     /// they are just statistical quantities and do not represent actual error!
-    sfeTkError_t getVelocityStdDev(sfe_otos_pose2d_t &pose);
+    sfTkError_t getVelocityStdDev(sfe_otos_pose2d_t &pose);
 
     /// @brief Gets the standard deviation of the measured acceleration
     /// @param pose Standard deviation of the acceleration measured by the OTOS
@@ -315,7 +327,7 @@ class sfeQwiicOtos
     /// @note These values are just the square root of the diagonal elements of
     /// the covariance matrices of the Kalman filters used in the firmware, so
     /// they are just statistical quantities and do not represent actual error!
-    sfeTkError_t getAccelerationStdDev(sfe_otos_pose2d_t &pose);
+    sfTkError_t getAccelerationStdDev(sfe_otos_pose2d_t &pose);
 
     /// @brief Gets the position, velocity, and acceleration measured by the
     /// OTOS in a single burst read
@@ -323,7 +335,7 @@ class sfeQwiicOtos
     /// @param vel Velocity measured by the OTOS
     /// @param acc Acceleration measured by the OTOS
     /// @return 0 for succuss, negative for errors, positive for warnings
-    sfeTkError_t getPosVelAcc(sfe_otos_pose2d_t &pos, sfe_otos_pose2d_t &vel, sfe_otos_pose2d_t &acc);
+    sfTkError_t getPosVelAcc(sfe_otos_pose2d_t &pos, sfe_otos_pose2d_t &vel, sfe_otos_pose2d_t &acc);
 
     /// @brief Gets the standard deviation of the measured position, velocity,
     /// and acceleration in a single burst read
@@ -331,7 +343,7 @@ class sfeQwiicOtos
     /// @param vel Standard deviation of the velocity measured by the OTOS
     /// @param acc Standard deviation of the acceleration measured by the OTOS
     /// @return 0 for succuss, negative for errors, positive for warnings
-    sfeTkError_t getPosVelAccStdDev(sfe_otos_pose2d_t &pos, sfe_otos_pose2d_t &vel, sfe_otos_pose2d_t &acc);
+    sfTkError_t getPosVelAccStdDev(sfe_otos_pose2d_t &pos, sfe_otos_pose2d_t &vel, sfe_otos_pose2d_t &acc);
 
     /// @brief Gets the position, velocity, acceleration, and standard deviation
     /// of each in a single burst read
@@ -342,8 +354,9 @@ class sfeQwiicOtos
     /// @param velStdDev Standard deviation of the velocity measured by the OTOS
     /// @param accStdDev Standard deviation of the acceleration measured by the OTOS
     /// @return 0 for succuss, negative for errors, positive for warnings
-    sfeTkError_t getPosVelAccAndStdDev(sfe_otos_pose2d_t &pos, sfe_otos_pose2d_t &vel, sfe_otos_pose2d_t &acc,
-                        sfe_otos_pose2d_t &posStdDev, sfe_otos_pose2d_t &velStdDev, sfe_otos_pose2d_t &accStdDev);
+    sfTkError_t getPosVelAccAndStdDev(sfe_otos_pose2d_t &pos, sfe_otos_pose2d_t &vel, sfe_otos_pose2d_t &acc,
+                                      sfe_otos_pose2d_t &posStdDev, sfe_otos_pose2d_t &velStdDev,
+                                      sfe_otos_pose2d_t &accStdDev);
 
     /// @brief Default I2C addresses of the Qwiic OTOS
     static constexpr uint8_t kDefaultAddress = 0x17;
@@ -360,10 +373,10 @@ class sfeQwiicOtos
     virtual void delayMs(uint32_t ms) = 0;
 
     // Function to read raw pose registers and convert to specified units
-    sfeTkError_t readPoseRegs(uint8_t reg, sfe_otos_pose2d_t &pose, float rawToXY, float rawToH);
+    sfTkError_t readPoseRegs(uint8_t reg, sfe_otos_pose2d_t &pose, float rawToXY, float rawToH);
 
     // Function to write raw pose registers and convert from specified units
-    sfeTkError_t writePoseRegs(uint8_t reg, sfe_otos_pose2d_t &pose, float xyToRaw, float hToRaw);
+    sfTkError_t writePoseRegs(uint8_t reg, sfe_otos_pose2d_t &pose, float xyToRaw, float hToRaw);
 
     // Function to convert raw pose registers to a pose structure
     void regsToPose(uint8_t *rawData, sfe_otos_pose2d_t &pose, float rawToXY, float rawToH);
@@ -372,7 +385,7 @@ class sfeQwiicOtos
     void poseToRegs(uint8_t *rawData, sfe_otos_pose2d_t &pose, float xyToRaw, float hToRaw);
 
     // I2C bus to use for communication
-    sfeTkII2C *_commBus;
+    sfTkII2C *_commBus;
 
     // Units to be used by the public pose functions. Everything uses meters and
     // radians internally, so this just determines what conversion factor is
