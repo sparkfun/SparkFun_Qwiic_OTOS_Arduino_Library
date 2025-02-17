@@ -44,7 +44,7 @@ The following examples are provided with the library
 
 ## Documentation
 
-The full API and use documentation for this library is provided [here](https://docs.sparkfun.com/SparkFun_Qwiic_OTOS_Arduino_Library/). For a quick reference, the main methods available in the library are listed [here](https://docs.sparkfun.com/SparkFun_Qwiic_OTOS_Arduino_Library/functions.html).
+The full API and use documentation for this library is provided [here](https://docs.sparkfun.com/SparkFun_Qwiic_OTOS_Arduino_Library/). For a quick reference, the main methods available in the library are listed [here](https://docs.sparkfun.com/SparkFun_Qwiic_OTOS_Arduino_Library/class_qwiic_o_t_o_s.html).
 
 Curious about the hardware this board works with - visit the SparkFun Optical Tracking Odometry Sensor [hardware repository](https://github.com/sparkfun/SparkFun_Optical_Tracking_Odometry_Sensor).
 
