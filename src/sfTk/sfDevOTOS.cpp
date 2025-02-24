@@ -61,7 +61,7 @@ sfTkError_t sfDevOTOS::isConnected()
 
     // Read the product ID
     uint8_t prodId;
-    err = _commBus->readRegisterByte(kRegProductId, prodId);
+    err = _commBus->readRegister(kRegProductId, prodId);
     if (err != ksfTkErrOk)
         return err;
 
@@ -78,7 +78,7 @@ sfTkError_t sfDevOTOS::getVersionInfo(sfe_otos_version_t &hwVersion, sfe_otos_ve
     // Read hardware and firmware version registers
     uint8_t rawData[2];
     size_t readBytes;
-    sfTkError_t err = _commBus->readRegisterRegion(kRegHwVersion, rawData, 2, readBytes);
+    sfTkError_t err = _commBus->readRegister(kRegHwVersion, rawData, sizeof(rawData), readBytes);
     if (err != ksfTkErrOk)
         return err;
 
@@ -99,7 +99,7 @@ sfTkError_t sfDevOTOS::selfTest()
     // Write the self-test register to start the test
     sfe_otos_self_test_config_t selfTest;
     selfTest.start = 1;
-    sfTkError_t err = _commBus->writeRegisterByte(kRegSelfTest, selfTest.value);
+    sfTkError_t err = _commBus->writeRegister(kRegSelfTest, selfTest.value);
     if (err != ksfTkErrOk)
         return err;
 
@@ -110,7 +110,7 @@ sfTkError_t sfDevOTOS::selfTest()
         delayMs(5);
 
         // Read the self-test register
-        err = _commBus->readRegisterByte(kRegSelfTest, selfTest.value);
+        err = _commBus->readRegister(kRegSelfTest, selfTest.value);
         if (err != ksfTkErrOk)
             return err;
 
@@ -128,7 +128,7 @@ sfTkError_t sfDevOTOS::selfTest()
 sfTkError_t sfDevOTOS::calibrateImu(uint8_t numSamples, bool waitUntilDone)
 {
     // Write the number of samples to the device
-    sfTkError_t err = _commBus->writeRegisterByte(kRegImuCalib, numSamples);
+    sfTkError_t err = _commBus->writeRegister(kRegImuCalib, numSamples);
     if (err != ksfTkErrOk)
         return err;
 
@@ -146,7 +146,7 @@ sfTkError_t sfDevOTOS::calibrateImu(uint8_t numSamples, bool waitUntilDone)
     {
         // Read the gryo calibration register value
         uint8_t calibrationValue;
-        err = _commBus->readRegisterByte(kRegImuCalib, calibrationValue);
+        err = _commBus->readRegister(kRegImuCalib, calibrationValue);
         if (err != ksfTkErrOk)
             return err;
 
@@ -167,7 +167,7 @@ sfTkError_t sfDevOTOS::calibrateImu(uint8_t numSamples, bool waitUntilDone)
 sfTkError_t sfDevOTOS::getImuCalibrationProgress(uint8_t &numSamples)
 {
     // Read the IMU calibration register
-    return _commBus->readRegisterByte(kRegImuCalib, numSamples);
+    return _commBus->readRegister(kRegImuCalib, numSamples);
 }
 
 sfe_otos_linear_unit_t sfDevOTOS::getLinearUnit()
@@ -210,7 +210,7 @@ sfTkError_t sfDevOTOS::getLinearScalar(float &scalar)
 {
     // Read the linear scalar from the device
     uint8_t rawScalar;
-    sfTkError_t err = _commBus->readRegisterByte(kRegScalarLinear, rawScalar);
+    sfTkError_t err = _commBus->readRegister(kRegScalarLinear, rawScalar);
     if (err != ksfTkErrOk)
         return ksfTkErrFail;
 
@@ -231,14 +231,14 @@ sfTkError_t sfDevOTOS::setLinearScalar(float scalar)
     uint8_t rawScalar = (int8_t)((scalar - 1.0f) * 1000 + 0.5f);
 
     // Write the scalar to the device
-    return _commBus->writeRegisterByte(kRegScalarLinear, rawScalar);
+    return _commBus->writeRegister(kRegScalarLinear, rawScalar);
 }
 
 sfTkError_t sfDevOTOS::getAngularScalar(float &scalar)
 {
     // Read the angular scalar from the device
     uint8_t rawScalar;
-    sfTkError_t err = _commBus->readRegisterByte(kRegScalarAngular, rawScalar);
+    sfTkError_t err = _commBus->readRegister(kRegScalarAngular, rawScalar);
     if (err != ksfTkErrOk)
         return ksfTkErrFail;
 
@@ -259,30 +259,30 @@ sfTkError_t sfDevOTOS::setAngularScalar(float scalar)
     uint8_t rawScalar = (int8_t)((scalar - 1.0f) * 1000 + 0.5f);
 
     // Write the scalar to the device
-    return _commBus->writeRegisterByte(kRegScalarAngular, rawScalar);
+    return _commBus->writeRegister(kRegScalarAngular, rawScalar);
 }
 
 sfTkError_t sfDevOTOS::resetTracking()
 {
     // Set tracking reset bit
-    return _commBus->writeRegisterByte(kRegReset, 0x01);
+    return _commBus->writeRegister(kRegReset, (uint8_t)0x01);
 }
 
 sfTkError_t sfDevOTOS::getSignalProcessConfig(sfe_otos_signal_process_config_t &config)
 {
     // Read the signal process register
-    return _commBus->readRegisterByte(kRegSignalProcess, config.value);
+    return _commBus->readRegister(kRegSignalProcess, config.value);
 }
 
 sfTkError_t sfDevOTOS::setSignalProcessConfig(sfe_otos_signal_process_config_t &config)
 {
     // Write the signal process register
-    return _commBus->writeRegisterByte(kRegSignalProcess, config.value);
+    return _commBus->writeRegister(kRegSignalProcess, config.value);
 }
 
 sfTkError_t sfDevOTOS::getStatus(sfe_otos_status_t &status)
 {
-    return _commBus->readRegisterByte(kRegStatus, status.value);
+    return _commBus->readRegister(kRegStatus, status.value);
 }
 
 sfTkError_t sfDevOTOS::getOffset(sfe_otos_pose2d_t &pose)
@@ -335,7 +335,7 @@ sfTkError_t sfDevOTOS::getPosVelAcc(sfe_otos_pose2d_t &pos, sfe_otos_pose2d_t &v
     // Read all pose registers
     uint8_t rawData[18];
     size_t bytesRead;
-    sfTkError_t err = _commBus->readRegisterRegion(kRegPosXL, rawData, 18, bytesRead);
+    sfTkError_t err = _commBus->readRegister(kRegPosXL, rawData, 18, bytesRead);
     if (err != ksfTkErrOk)
         return err;
 
@@ -357,7 +357,7 @@ sfTkError_t sfDevOTOS::getPosVelAccStdDev(sfe_otos_pose2d_t &pos, sfe_otos_pose2
     // Read all pose registers
     uint8_t rawData[18];
     size_t bytesRead;
-    sfTkError_t err = _commBus->readRegisterRegion(kRegPosStdXL, rawData, 18, bytesRead);
+    sfTkError_t err = _commBus->readRegister(kRegPosStdXL, rawData, 18, bytesRead);
     if (err != ksfTkErrOk)
         return err;
 
@@ -381,7 +381,7 @@ sfTkError_t sfDevOTOS::getPosVelAccAndStdDev(sfe_otos_pose2d_t &pos, sfe_otos_po
     // Read all pose registers
     uint8_t rawData[36];
     size_t bytesRead;
-    sfTkError_t err = _commBus->readRegisterRegion(kRegPosXL, rawData, 36, bytesRead);
+    sfTkError_t err = _commBus->readRegister(kRegPosXL, rawData, 36, bytesRead);
     if (err != ksfTkErrOk)
         return err;
 
@@ -407,7 +407,7 @@ sfTkError_t sfDevOTOS::readPoseRegs(uint8_t reg, sfe_otos_pose2d_t &pose, float 
     uint8_t rawData[6];
 
     // Attempt to read the raw pose data
-    sfTkError_t err = _commBus->readRegisterRegion(reg, rawData, 6, bytesRead);
+    sfTkError_t err = _commBus->readRegister(reg, rawData, 6, bytesRead);
     if (err != ksfTkErrOk)
         return err;
 
@@ -428,7 +428,7 @@ sfTkError_t sfDevOTOS::writePoseRegs(uint8_t reg, sfe_otos_pose2d_t &pose, float
     poseToRegs(rawData, pose, xyToRaw, hToRaw);
 
     // Write the raw data to the device
-    return _commBus->writeRegisterRegion(reg, rawData, 6);
+    return _commBus->writeRegister(reg, rawData, 6);
 }
 
 void sfDevOTOS::regsToPose(uint8_t *rawData, sfe_otos_pose2d_t &pose, float rawToXY, float rawToH)
