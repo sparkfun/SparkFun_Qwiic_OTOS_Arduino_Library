@@ -1,8 +1,27 @@
-/*
-    SPDX-License-Identifier: MIT
-    
-    Copyright (c) 2024 SparkFun Electronics
-*/
+/**
+ * @file SparkFun_Qwiic_OTOS_Arduino_Library.h
+ * @brief Arduino wrapper for the SparkFun Qwiic OTOS sensor driver
+ * @details This file provides an Arduino-compatible interface to the SparkFun Qwiic
+ *          Optical Tracking Odometry Sensor (OTOS). It wraps the platform-agnostic
+ *          C++ driver to provide familiar Arduino conventions and simplified usage.
+ *
+ * Features:
+ * - Simple Arduino-style begin() function
+ * - Default Wire interface support
+ * - Compatible with all Arduino platforms
+ * - Inherits all functionality from base C++ driver
+ * - Automatic I2C bus configuration
+ *
+ * @author SparkFun Electronics
+ * @date February 2024
+ * @copyright Copyright (c) 2024-2025, SparkFun Electronics Inc.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * @see https://github.com/sparkfun/SparkFun_Qwiic_OTOS_Arduino_Library
+ */
+
+// ...existing code...
 
 /*******************************************************************************
     SparkFun_Qwiic_OTOS_Arduino_Library.h - Arduino wrapper of the C++ driver
@@ -13,14 +32,16 @@
 *******************************************************************************/
 
 #pragma once
-
+// clang-format off
 #include "Arduino.h"
-#include "sfeQwiicOtos.h"
+#include <SparkFun_Toolkit.h>
+#include "sfTk/sfDevOTOS.h"
 #include <Wire.h>
+// clang-format on
 
 /// @brief Arduino class for the SparkFun Qwiic Optical Tracking Odometry Sensor
 /// (OTOS)
-class QwiicOTOS : public sfeQwiicOtos
+class QwiicOTOS : public sfDevOTOS
 {
   public:
     /// @brief Begins the Qwiic OTOS and verifies it is connected
@@ -32,7 +53,7 @@ class QwiicOTOS : public sfeQwiicOtos
         _theI2CBus.init(wirePort, kDefaultAddress);
 
         // Begin the sensor
-        return sfeQwiicOtos::begin(&_theI2CBus) == kSTkErrOk;
+        return sfDevOTOS::begin(&_theI2CBus) == ksfTkErrOk;
     }
 
   protected:
@@ -42,5 +63,5 @@ class QwiicOTOS : public sfeQwiicOtos
     }
 
   private:
-    sfeTkArdI2C _theI2CBus;
+    sfTkArdI2C _theI2CBus;
 };
